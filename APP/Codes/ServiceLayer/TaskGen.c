@@ -6,81 +6,6 @@
 //#include "AlarmCfg.h"
 #include "osif_freertos.h"
 
-int localmemory0 __attribute__((section(".uninitdata"))) = 0;
-int localmemory1 __attribute__((section(".uninitdata"))) = 0;
-int globalmemory __attribute__((section(".uninitdata"))) = 0;
-
-typedef void (*AlarmCallBackEntry)(void);
-struct tTMR;
-typedef struct tTMR * pTmr;
-typedef u8 TMR_STATE;
-
-#define CONFIG_ALARM_NUMBER   10
-
-typedef struct
-{
-	TMR_STATE State;
-	u32 DiffTimeOutVal;
-	u32 CycleTimeOutVal;
-	pTmr hPrevTmr;
-	pTmr hNextTmr;
-} TMR_RAM;
-
-
-/// ALARM 配置信息表结构
-typedef struct
-{
-    u8                     taskId;
-    u32                    setEvent;
-    AlarmCallBackEntry     callBack;
-
-} TmrConfigTable_St;
-
-
-typedef struct tTMR
-{
-	TMR_RAM *    pRAMData;
-	const TmrConfigTable_St *   configTable;
-} TMR;
-
-const static  TmrConfigTable_St  s_TmrCfgPwrManage_t =
-{
-    //TID_PwrManage,
-    //EVENT_PwrManage_TIMER_10MS_EVENT,
-    NULL,
-};
-
- void Alarm_DebugCyc_CallBack(void){};
-
-const static  TmrConfigTable_St  s_TmrCfgDebugCyc_t =
-{
-    0,
-    0,
-    Alarm_DebugCyc_CallBack,
-};
-
-static TMR_RAM TmrRamPwrManage =
-{
-    0, 0, 0, NULL, NULL
-};
-
-static TMR_RAM TmrRamDebugCyc =
-{
-    0, 0, 0, NULL, NULL
-};
-
-TMR AlarmTable[CONFIG_ALARM_NUMBER] =
-{
-    {&TmrRamPwrManage, &s_TmrCfgPwrManage_t},
-    {&TmrRamDebugCyc, &s_TmrCfgDebugCyc_t},
-};
-
-const bool AlarmAutoStartFlag[CONFIG_ALARM_NUMBER] =
-{
-	true,
-    false,
-};
-
 TaskHandle_t TaskTcbTbl[FREERTOS_MAX_TASK_NUM];
 QueueHandle_t TaskDataQueueTbl[FREERTOS_MAX_TASK_NUM];
 QueueHandle_t TaskMailBoxTbl[FREERTOS_MAX_TASK_NUM];
@@ -107,16 +32,16 @@ int TasksCreateStatic(void)
     u8 TaskIDCnt = 0;
 
     /*
-        开始创建任务 , 任务指针 Key_Task -->            osName##_Task() 
+        开始创建任务 , 任务指针 Key_Task -->            osName##_Task()
         开始跑循环 , 在 osal.c中有定义
 
-		osName##_Task() 
+		osName##_Task()
 		{
 			init();
 			while(1)
 			{
 				;
-			}			
+			}
 		}
     */
     xTaskCreate(Key_Task, "Key", 50, NULL, 2, &xHandle);
@@ -129,7 +54,7 @@ int TasksCreateStatic(void)
     {
         return 1;
     }
-	
+
     xTaskCreate(Led_Task, "Led", 50, NULL, 3, &xHandle);
     if(xHandle != NULL)
     {
@@ -151,7 +76,7 @@ int TasksCreateStatic(void)
     {
         return 1;
     }
-	
+
 
     return 0;
 }
