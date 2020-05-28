@@ -43,7 +43,7 @@ void LedManage_Func(void)
 
 TASK_INIT(Led)
 {
-	//SetAlarm(ALARM_NAME(PwrManage), 5, 10);
+
 
 	enableCycleEvent((TASK_NAME(Led)));
 
