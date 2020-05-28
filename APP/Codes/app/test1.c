@@ -43,7 +43,7 @@ void KeyManage_Func(void)
 
 TASK_INIT(Key)
 {
-	//SetAlarm(ALARM_NAME(PwrManage), 5, 10);
+
 
 
 	enableCycleEvent((TASK_NAME(Key)));
