@@ -14,9 +14,10 @@
 
 
 #include "osal.h"
-#include "taskHandl.h"
 #include "eventDefine.h"
 #include "sys.h"
+#include "TaskId.h"
+
 
 
 #define CYCHDR_TICK            5
@@ -27,7 +28,7 @@
 	{false , 1 , 5  , TASK_NAME(Led), 	EVENT_Led_TIMER_5MS_EVENT   },\
 	{false , 1 , 20 , TASK_NAME(Led), 	EVENT_Led_TIMER_20MS_EVENT  },\
 	{false , 1 , 5  , TASK_NAME(Uart1),	EVENT_Uart1_TIMER_5MS_EVENT },
-	
+
 
 extern void enableCycleEvent(u8 tskId);
 
@@ -85,7 +86,7 @@ struct finsh_sysvar* finsh_sysvar_next(struct finsh_sysvar* call);
         __fsym_##cmd##_name,    \
         (syscall_func)&name     \
     }
-    
+
 #define FINSH_VAR_EXPORT(name, type, desc)              \
     const char __vsym_##name##_name[] = #name;          \
     const struct finsh_sysvar __vsym_##name = \
@@ -117,7 +118,7 @@ struct finsh_sysvar* finsh_sysvar_next(struct finsh_sysvar* call);
  */
 #define FINSH_FUNCTION_EXPORT_ALIAS(name, alias, desc)  \
         FINSH_FUNCTION_EXPORT_CMD(name, alias, desc)
-        
+
 #define MSH_CMD_EXPORT(command, desc)   \
         FINSH_FUNCTION_EXPORT_CMD(command, __cmd_##command, desc)
 

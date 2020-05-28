@@ -55,7 +55,7 @@
  */
 
 #include "osif_freertos.h"
-
+#include "eventDefine.h"
 #include <string.h>
 #include <stdbool.h>
 
@@ -184,7 +184,7 @@ u32 OSIF_MutexLock(u8 MutexId, const u32 timeout)
     TaskHandle_t current_task_handle;
     BaseType_t operation_status = pdFAIL;
     mutex_t * pMutex;
-    
+
 
     if(MutexId > FREERTOS_MAX_SEM_AND_MTX_NUM)
     {
@@ -225,7 +225,7 @@ u32 OSIF_MutexLock(u8 MutexId, const u32 timeout)
             }
         }
     }
-    
+
     return osif_ret_code;
 }
 
@@ -247,7 +247,7 @@ u32 OSIF_MutexUnlock(u8 MutexId)
     TaskHandle_t current_task_handle;
     BaseType_t operation_status = pdFAIL;
     mutex_t * pMutex;
-    
+
 
     if(MutexId > FREERTOS_MAX_SEM_AND_MTX_NUM)
     {
@@ -276,7 +276,7 @@ u32 OSIF_MutexUnlock(u8 MutexId)
             }
         }
     }
-    
+
     return osif_ret_code;
 }
 
@@ -343,8 +343,8 @@ u32 OSIF_SemaWait(const u8 SemId, const u32 timeout)
     BaseType_t operation_status;
     u32 osif_ret_code;
     semaphore_t * pSem;
-    
-    
+
+
     if(SemId > FREERTOS_MAX_SEM_AND_MTX_NUM)
     {
         osif_ret_code =  1;
@@ -367,7 +367,7 @@ u32 OSIF_SemaWait(const u8 SemId, const u32 timeout)
 
         osif_ret_code = (operation_status == pdPASS) ? 0 : 1;
     }
-    
+
     return osif_ret_code;
 }
 
@@ -384,8 +384,8 @@ u32 OSIF_SemaPost(const u8 SemId)
     u32 osif_ret_code;
     semaphore_t * pSem;
     bool is_isr;
-    
-    
+
+
     if(SemId > FREERTOS_MAX_SEM_AND_MTX_NUM)
     {
         osif_ret_code =  1;
@@ -416,7 +416,7 @@ u32 OSIF_SemaPost(const u8 SemId)
         /* pdFAIL in case that the semaphore is full */
         osif_ret_code = (operation_status == pdPASS) ? 0 : 1;
     }
-    
+
     return osif_ret_code;
 }
 
@@ -472,8 +472,8 @@ u32 OSIF_ActivateTsk(u8 tskId)
     TaskHandle_t xHandle = NULL;
     bool is_isr;
     u32 osif_ret_code = 0;
-    
-    
+
+
     if(tskId > FREERTOS_MAX_TASK_NUM)
     {
         osif_ret_code =  1;
@@ -490,8 +490,8 @@ u32 OSIF_ActivateTsk(u8 tskId)
             {
                 /* Execution from exception handler (ISR) */
                 portBASE_TYPE xYieldRequired;
-                
-                
+
+
                 xYieldRequired = xTaskResumeFromISR(xHandle);
                 if (xYieldRequired == pdPASS)
                 {
@@ -509,7 +509,7 @@ u32 OSIF_ActivateTsk(u8 tskId)
             osif_ret_code = 1;
         }
     }
-    
+
     return osif_ret_code;
 }
 
@@ -517,8 +517,8 @@ u32 OSIF_TerminateTsk(u8 tskId)
 {
     TaskHandle_t xHandle = NULL;
     u32 osif_ret_code = 0;
-    
-    
+
+
     if(tskId > FREERTOS_MAX_TASK_NUM)
     {
         osif_ret_code =  1;
@@ -536,7 +536,7 @@ u32 OSIF_TerminateTsk(u8 tskId)
             osif_ret_code =  1;
         }
     }
-    
+
     return osif_ret_code;
 }
 
@@ -544,7 +544,7 @@ u8 OSIF_GetActiveTask(void)
 {
     TaskHandle_t xHandle = NULL;
     u8 TaskIdCnt = 0;
-    
+
 
     xHandle = xTaskGetCurrentTaskHandle();
     for(TaskIdCnt = 1; TaskIdCnt < FREERTOS_MAX_TASK_NUM; TaskIdCnt++)
@@ -554,12 +554,12 @@ u8 OSIF_GetActiveTask(void)
             break;
         }
     }
-    
+
     if(TaskIdCnt == FREERTOS_MAX_TASK_NUM)
     {
         TaskIdCnt = 0xff;
     }
-    
+
     return TaskIdCnt;
 }
 
@@ -568,7 +568,7 @@ u8 OSIF_GetActiveTask(void)
  * Function Name : OSIF_EventPoolInit
  * Description   : This function init event pool.
  *
- * Implements : 
+ * Implements :
  *END**************************************************************************/
 void OSIF_EventPoolInit(void)
 {
@@ -611,7 +611,7 @@ u32 OSIF_EVSendTask(u8 tskId, s32 event)
     {
         RetVal = 3;
     }
-    
+
     return RetVal;
 }
 
@@ -621,7 +621,7 @@ u32 OSIF_WaitEvent(u32 inEvents, u32 timeout)
     u8  tskId;
     BaseType_t RetVal = pdPASS;
     QueueHandle_t xQueue = NULL;
-    
+
 
     tskId = OSIF_GetActiveTask();
     xQueue = TaskDataQueueTbl[tskId];
@@ -661,7 +661,7 @@ u32 OSIF_WaitEvent(u32 inEvents, u32 timeout)
     }
     else
     {
-        
+
     }
 
     return (singal);
@@ -680,7 +680,7 @@ static u32 OSIF_SendMailboxInternal(u8 mbid, SMP_MSG* mb_msg)
     {
         RetVal = 1;
     }
-    
+
     xQueue = TaskMailBoxTbl[mbid];
     if(xQueue != NULL)
     {
@@ -703,7 +703,7 @@ static u32 OSIF_SendMailboxInternal(u8 mbid, SMP_MSG* mb_msg)
     {
         RetVal = 2;
     }
-    
+
     return RetVal;
 }
 
@@ -750,7 +750,7 @@ s32 OS_ReceiveMailboxInternal(u8 mbid, SMP_MSG **mb_msg, u32 timeout)
     }
     else
     {
-        
+
     }
 
     return (RetVal);
@@ -763,7 +763,7 @@ u32 OSIF_SendMailbox(u8 mbid, u8* pcMsg, u16 u16MsgLen)
     u8 *pData = NULL;
     u16 MemoryLen;
     bool is_isr;
-    
+
 
     if((NULL != pcMsg) && (u16MsgLen > 0))
     {
@@ -779,9 +779,9 @@ u32 OSIF_SendMailbox(u8 mbid, u8* pcMsg, u16 u16MsgLen)
                 mqMsg = (SMP_MSG *)pData;
                 mqMsg->datalen = u16MsgLen;
                 pData += sizeof(SMP_MSG);
-                
+
                 memcpy(pData, pcMsg, u16MsgLen);
-                
+
                 RetVal = OSIF_SendMailboxInternal(mbid, mqMsg);
                 if(RetVal != 0)
                 {
@@ -817,8 +817,8 @@ u32 OSIF_ReceiveMailbox(u8 mbid, u8 **pBuf, u16 *pBufLen, u32 timeout)
     u32 RetVal = 0;
     SMP_MSG *mqMsg;
     u8 *pData = NULL;
-	
-	
+
+
     if((NULL != pBuf) && (pBufLen != NULL))
     {
         RetVal = OS_ReceiveMailboxInternal((u8)mbid, &mqMsg, (u32)timeout);
@@ -845,7 +845,7 @@ u32 OSIF_MQSend(u8 tskId, u8 *pcMsg, u16 u16MsgLen)
     u32 RetVal = 0;
     u8 mbxId;
     bool is_isr;
-	
+
 
     if((tskId <= FREERTOS_MAX_TASK_NUM) && (NULL != pcMsg) && (u16MsgLen > 0))
     {

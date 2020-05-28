@@ -389,6 +389,11 @@
               <FileType>1</FileType>
               <FilePath>.\app\test2.c</FilePath>
             </File>
+            <File>
+              <FileName>Uart1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\app\Uart1.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -759,6 +764,11 @@
               <FileType>1</FileType>
               <FilePath>.\Driver\Pin\GPIO.c</FilePath>
             </File>
+            <File>
+              <FileName>key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Driver\key.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -888,6 +898,11 @@
               <FileName>fifo.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Lib\fifo.c</FilePath>
+            </File>
+            <File>
+              <FileName>cychdr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Lib\cychdr.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -13,13 +13,10 @@
  ******************************************************************************/
 
 
-#include <kernel.h>
-#include "kernel_id.h"
-#include "osal.h"
-#include "eventDefine.h"
-#include "base_types.h"
+
+#include "osif_freertos.h"
 #include "cychdr.h"
-#include "bsp.h"
+
 
 typedef struct
 {
@@ -28,7 +25,7 @@ typedef struct
 	u16    periodTtick;
     u8     tskId;
 	s32    event;
-    
+
 } CycleFrame;
 
 

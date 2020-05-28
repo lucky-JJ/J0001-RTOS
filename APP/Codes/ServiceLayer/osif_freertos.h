@@ -17,8 +17,7 @@ typedef SemaphoreHandle_t semaphore_t;
 
 #define FEATURE_OSIF_FREERTOS_ISR_CONTEXT_METHOD         (1) /* Cortex M device */
 
-#define EVENT_GLOBAL_MAILBOX            0x1
-#define EVENT_GLOBAL_Watchdog            0x2
+
 
 
 #define OSIF_WAIT_FOREVER 0xFFFFFFFFu
