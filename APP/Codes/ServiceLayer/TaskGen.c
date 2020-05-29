@@ -44,6 +44,19 @@ int TasksCreateStatic(void)
 			}
 		}
     */
+
+    xTaskCreate(Uart1_Task, "Uart1", 200, NULL, 1, &xHandle);
+    if(xHandle != NULL)
+    {
+        TaskIDCnt++;
+        TaskTcbTbl[TaskIDCnt] = xHandle;
+    }
+    else
+    {
+        return 1;
+    }
+
+	
     xTaskCreate(Key_Task, "Key", 50, NULL, 2, &xHandle);
     if(xHandle != NULL)
     {
@@ -66,16 +79,7 @@ int TasksCreateStatic(void)
         return 1;
     }
 
-    xTaskCreate(Uart1_Task, "Uart1", 200, NULL, 1, &xHandle);
-    if(xHandle != NULL)
-    {
-        TaskIDCnt++;
-        TaskTcbTbl[TaskIDCnt] = xHandle;
-    }
-    else
-    {
-        return 1;
-    }
+
 
 
     return 0;

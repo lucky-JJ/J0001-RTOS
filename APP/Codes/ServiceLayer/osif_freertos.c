@@ -86,7 +86,6 @@
 /* Cortex M device - read ICSR[IPSR] value */
 static inline bool osif_IsIsrContext(void)
 {
-
     bool is_isr = false;
     u32 ipsr_code = (u32)( (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) >> SCB_ICSR_VECTACTIVE_Pos );
     if (ipsr_code != 0u)
@@ -96,7 +95,6 @@ static inline bool osif_IsIsrContext(void)
 
     return is_isr;
 
-    return 1;
 }
 #elif FEATURE_OSIF_FREERTOS_ISR_CONTEXT_METHOD == 2
 /* PowerPC device, for FreeRTOS 9.0.0 read the SPRG0 reg that denotes the u32errupt nesting level */
