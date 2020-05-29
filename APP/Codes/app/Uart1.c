@@ -45,7 +45,7 @@ void Uart1Manage_Func(void)
 
 TASK_INIT(Uart1)
 {
-	//SetAlarm(ALARM_NAME(PwrManage), 5, 10);
+	
 
 	enableCycleEvent((TASK_NAME(Uart1)));
 
