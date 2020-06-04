@@ -75,27 +75,33 @@
 /*-----------------------------------------------------------
  * PUBLIC LIST API documented in list.h
  *----------------------------------------------------------*/
-
+/*初始化列表*/
 void vListInitialise( List_t * const pxList )
 {
 	/* The list structure contains a list item which is used to mark the
 	end of the list.  To initialise the list the list end is inserted
 	as the only list entry. */
+	/*列表索引指向列表项*/
 	pxList->pxIndex = ( ListItem_t * ) &( pxList->xListEnd );			/*lint !e826 !e740 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
 
 	/* The list end value is the highest possible value in the list to
 	ensure it remains at the end of the list. */
+	/* 列表结束值是列表中可能的最大值,确保它保持在列表的末尾 */
 	pxList->xListEnd.xItemValue = portMAX_DELAY;
 
 	/* The list end next and previous pointers point to itself so we know
-	when the list is empty. */
+	when the list is empty. 
+	我们知道当列表为空时列表的下一个和前一个指针指向它自己
+	*/
 	pxList->xListEnd.pxNext = ( ListItem_t * ) &( pxList->xListEnd );	/*lint !e826 !e740 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
 	pxList->xListEnd.pxPrevious = ( ListItem_t * ) &( pxList->xListEnd );/*lint !e826 !e740 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
 
 	pxList->uxNumberOfItems = ( UBaseType_t ) 0U;
 
 	/* Write known values into the list if
-	configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+	configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. 
+	设置为已知值，用于检测列表数据是否完整 0x5a5a
+	*/
 	listSET_LIST_INTEGRITY_CHECK_1_VALUE( pxList );
 	listSET_LIST_INTEGRITY_CHECK_2_VALUE( pxList );
 }
@@ -103,8 +109,8 @@ void vListInitialise( List_t * const pxList )
 
 void vListInitialiseItem( ListItem_t * const pxItem )
 {
-	/* Make sure the list item is not recorded as being on a list. */
-	pxItem->pvContainer = NULL;
+	/* 确保列表项没有被记录为在列表中 /Make sure the list item is not recorded as being on a list. */
+	pxItem->pvContainer = NULL;/*指向包含该列表项的列表*/
 
 	/* Write known values into the list item if
 	configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */

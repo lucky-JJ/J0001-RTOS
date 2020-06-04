@@ -268,7 +268,7 @@ __weak void HAL_MspDeInit(void)
   */
 __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 {
-  /*Configure the SysTick to have interrupt in 1ms time basis*/
+  /*Configure the SysTick to have interrupt in 1ms time basis 将SysTick配置为在1ms时间内具有中断*/
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
   /*Configure the SysTick IRQ priority */

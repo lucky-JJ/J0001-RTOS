@@ -9,14 +9,14 @@
 
 #undef _TSK_CFG_
 #undef STDTASKDEF
-#define STDTASKDEF(osName, Mode, Prio, stack, dtqdepth)  \
+#define STDTASKDEF(osName, Prio, StackDepth)  \
 			extern TASK_INIT(osName);
 #include "tsk.h"
 #undef STDTASKDEF
 
 #undef _TSK_CFG_
 #undef STDTASKDEF
-#define STDTASKDEF(osName, Mode, Prio, stack, dtqdepth)  \
+#define STDTASKDEF(osName, Prio, StackDepth)  \
 			extern TASK_CREATE(osName);
 #include "tsk.h"
 #undef STDTASKDEF

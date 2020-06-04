@@ -5,23 +5,12 @@
 Task define
 Para I------->name
 Para II------>priority
-Para III----->stack size
-Para IV------>DTQ depth
-
+Para III----->StackDepth
 ******************************************************************/
 #ifdef STDTASKDEF
-STDTASKDEF(Uart1,  	DEFAULTAPPMODE, 1, 100,   60)
-STDTASKDEF(Key,  	DEFAULTAPPMODE, 2, 100,   60)
-STDTASKDEF(Led,  	DEFAULTAPPMODE, 3, 100,   60)
-
-
-/*
-STDTASKDEF(BswService, DEFAULTAPPMODE, 1, 800,   180)
-STDTASKDEF(PwrManage,  DEFAULTAPPMODE, 2, 800,   180)
-STDTASKDEF(CAN,        DEFAULTAPPMODE, 3, 800,   180)
-STDTASKDEF(ComMPU,     DEFAULTAPPMODE, 4, 1200,  180)
-STDTASKDEF(Misc,       DEFAULTAPPMODE, 5, 800,   180)
-*/
+STDTASKDEF(Uart1,  	 1, 128)
+STDTASKDEF(Key,  	 2, 50)
+STDTASKDEF(Led,  	 3, 50)
 #endif
 
 #ifdef APPMODE

@@ -30,8 +30,8 @@ void LedManage_Func(void)
 
 	/* wait for events indefinitely and clear after end of function */
 	tSignals = cfThreadWaitWithTimeout((EVENT_GLOBAL_Watchdog |
-										EVENT_Led_TIMER_5MS_EVENT |
-										EVENT_Led_TIMER_20MS_EVENT ),
+										EVENT_TIMER_5MS |
+										EVENT_TIMER_10MS ),
 										OS_WAITFOREVER);
 
 

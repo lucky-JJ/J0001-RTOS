@@ -199,6 +199,8 @@ typedef enum
  *
  * \defgroup taskYIELD taskYIELD
  * \ingroup SchedulerControl
+
+ 	用于强制上下文切换的宏
  */
 #define taskYIELD()					portYIELD()
 

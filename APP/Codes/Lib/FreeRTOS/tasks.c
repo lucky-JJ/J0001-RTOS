@@ -2505,17 +2505,19 @@ BaseType_t xSwitchRequired = pdFALSE;
 	/* Called by the portable layer each time a tick interrupt occurs.
 	Increments the tick then checks to see if the new tick value will cause any
 	tasks to be unblocked. 
-	在每次tick中断发生时被可移植层调用。
-	递增滴答，然后检查新的滴答值是否会产生任何滴答
-	要解除阻塞的任务。
+
+    每当系统节拍定时器中断发生,移植层都会调用该函数.函数将系统节拍中断计数器加1,
+       然后检查新的系统节拍中断计数器值是否解除某个任务.
+
 	*/
 	traceTASK_INCREMENT_TICK( xTickCount );
 	if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
-	{
+	{/* 调度器正常情况 */
 		/* Minor optimisation.  The tick count cannot change in this
 		block. */
 		const TickType_t xConstTickCount = xTickCount + 1;
 
+		/* 系统节拍中断计数器加1,如果计数器溢出(为0),交换延时列表指针和溢出延时列表指针 */
 		/* Increment the RTOS tick, switching the delayed and overflowed
 		delayed lists if it wraps to 0. */
 		xTickCount = xConstTickCount;
@@ -2533,6 +2535,9 @@ BaseType_t xSwitchRequired = pdFALSE;
 		the	queue in the order of their wake time - meaning once one task
 		has been found whose block time has not expired there is no need to
 		look any further down the list. */
+
+		 /* 查看是否有延时任务到期.任务按照唤醒时间的先后顺序存储在队列中,
+		 这意味着只要队列中的最先唤醒任务没有到期,其它任务一定没有到期.*/
 		if( xConstTickCount >= xNextTaskUnblockTime )
 		{
 			for( ;; )
@@ -2544,6 +2549,8 @@ BaseType_t xSwitchRequired = pdFALSE;
 					unlikely that the
 					if( xTickCount >= xNextTaskUnblockTime ) test will pass
 					next time through. */
+
+					/* 如果延时列表为空,设置xNextTaskUnblockTime为最大值 */
 					xNextTaskUnblockTime = portMAX_DELAY; /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 					break;
 				}
@@ -2553,6 +2560,10 @@ BaseType_t xSwitchRequired = pdFALSE;
 					item at the head of the delayed list.  This is the time
 					at which the task at the head of the delayed list must
 					be removed from the Blocked state. */
+
+				  /* 如果延时列表不为空,获取延时列表第一个列表项值,这个列表项值存储任务唤醒时间.
+                   唤醒时间到期,延时列表中的第一个列表项所属的任务要被移除阻塞状态 */
+                   
 					pxTCB = ( TCB_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxDelayedTaskList );
 					xItemValue = listGET_LIST_ITEM_VALUE( &( pxTCB->xStateListItem ) );
 
@@ -2563,6 +2574,9 @@ BaseType_t xSwitchRequired = pdFALSE;
 						of the blocked list must be removed from the Blocked
 						state -	so record the item value in
 						xNextTaskUnblockTime. */
+
+						/* 任务还未到解除阻塞时间?将当前任务唤醒时间设置为下次解除阻塞时间. */
+						
 						xNextTaskUnblockTime = xItemValue;
 						break;
 					}
@@ -2572,10 +2586,13 @@ BaseType_t xSwitchRequired = pdFALSE;
 					}
 
 					/* It is time to remove the item from the Blocked state. */
+					/* 从阻塞列表中删除到期任务 */
 					( void ) uxListRemove( &( pxTCB->xStateListItem ) );
 
 					/* Is the task waiting on an event also?  If so remove
 					it from the event list. */
+
+					/* 是因为等待事件而阻塞?是的话将到期任务从事件列表中删除 */
 					if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
 					{
 						( void ) uxListRemove( &( pxTCB->xEventListItem ) );
@@ -2587,6 +2604,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 
 					/* Place the unblocked task into the appropriate ready
 					list. */
+					  /* 将解除阻塞的任务放入就绪列表 */
 					prvAddTaskToReadyList( pxTCB );
 
 					/* A task being unblocked cannot cause an immediate
@@ -2597,6 +2615,8 @@ BaseType_t xSwitchRequired = pdFALSE;
 						only be performed if the unblocked task has a
 						priority that is equal to or higher than the
 						currently executing task. */
+						/* 使能了抢占式内核.如果解除阻塞的任务优先级大于当前任务,
+						触发一次上下文切换标志 */
 						if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
 						{
 							xSwitchRequired = pdTRUE;
@@ -2614,6 +2634,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 		/* Tasks of equal priority to the currently running task will share
 		processing time (time slice) if preemption is on, and the application
 		writer has not explicitly turned time slicing off. */
+		 /* 如果有其它任务与当前任务共享一个优先级,则这些任务共享处理器(时间片) */
 		#if ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) )
 		{
 			if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCB->uxPriority ] ) ) > ( UBaseType_t ) 1 )
@@ -2631,6 +2652,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 		{
 			/* Guard against the tick hook being called when the pended tick
 			count is being unwound (when the scheduler is being unlocked). */
+			/* 调用时间片钩子函数*/
 			if( uxPendedTicks == ( UBaseType_t ) 0U )
 			{
 				vApplicationTickHook();
@@ -2657,6 +2679,8 @@ BaseType_t xSwitchRequired = pdFALSE;
 
 	#if ( configUSE_PREEMPTION == 1 )
 	{
+		/* 如果在中断中调用的API函数唤醒了更高优先级的任务,并且API函数的参数
+		pxHigherPriorityTaskWoken为NULL时,变量xYieldPending用于上下文切换标志 */
 		if( xYieldPending != pdFALSE )
 		{
 			xSwitchRequired = pdTRUE;

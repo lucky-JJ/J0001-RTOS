@@ -15,7 +15,7 @@ SemaphoreHandle_t SemphrTbl[FREERTOS_MAX_SEM_AND_MTX_NUM];
 /*声明在osal.c中定义的osName##_Task*/
 # undef _TSK_CFG_
 # undef STDTASKDEF
-# define STDTASKDEF(osName, Mode, Prio, stack, dtqdepth)  \
+# define STDTASKDEF(osName, Prio, StackDepth)  \
 extern void osName##_Task(void *pvParameters);
 # include "tsk.h"
 # undef STDTASKDEF
@@ -44,6 +44,19 @@ int TasksCreateStatic(void)
 			}
 		}
     */
+
+# undef _TSK_CFG_
+# undef STDTASKDEF
+# define STDTASKDEF(osName, Prio, StackDepth)  \
+	xTaskCreate(osName##_Task, "osName", StackDepth, NULL, Prio, &xHandle);\
+	TaskIDCnt++;\
+    TaskTcbTbl[TaskIDCnt] = xHandle;
+
+# include "tsk.h"
+# undef STDTASKDEF
+
+
+	
 
     xTaskCreate(Uart1_Task, "Uart1", 200, NULL, 1, &xHandle);
     if(xHandle != NULL)

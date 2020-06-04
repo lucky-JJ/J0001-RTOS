@@ -523,16 +523,20 @@ void xPortSysTickHandler( void )
 	save and then restore the interrupt mask value as its value is already
 	known - therefore the slightly faster vPortRaiseBASEPRI() function is used
 	in place of portSET_INTERRUPT_MASK_FROM_ISR(). */
+	
+	/*关中断*/
 	vPortRaiseBASEPRI();
 	{
-		/* Increment the RTOS tick. 增加操作系统的时间*/
+		/* Increment the RTOS tick. 更新系统时基 */
 		if( xTaskIncrementTick() != pdFALSE )
 		{
 			/* A context switch is required.  Context switching is performed in
 			the PendSV interrupt.  Pend the PendSV interrupt. */
+			/*启动上下文切换*/
 			portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;
 		}
 	}
+	/* 开中断 */
 	vPortClearBASEPRIFromISR();
 }
 /*-----------------------------------------------------------*/

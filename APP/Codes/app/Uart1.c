@@ -4,6 +4,7 @@
 #include "sys.h"
 #include "EventDefine.h"
 #include "cychdr.h"
+#include "usart.h"
 
 
 
@@ -35,7 +36,15 @@ void Uart1Manage_Func(void)
 										OS_WAITFOREVER);
 
 
-	if(tSignals & EVENT_GLOBAL_Watchdog)
+	if(tSignals & EVENT_TIMER_5MS)
+	{
+		USART1_ManageProc(10);
+	}
+	if(tSignals & EVENT_Uart1_TX_FINISH)
+	{
+		USART1_SendDataManage();
+	}
+	else if(tSignals & EVENT_GLOBAL_Watchdog)
 	{
 		;
 	}
@@ -46,6 +55,7 @@ void Uart1Manage_Func(void)
 TASK_INIT(Uart1)
 {
 	
+	uart1_init(Uart1_TxIntHandle, Uart1_RxIntHandle);
 
 	enableCycleEvent((TASK_NAME(Uart1)));
 

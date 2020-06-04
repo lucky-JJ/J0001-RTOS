@@ -16,7 +16,7 @@
     /*  0.声明2个任务项目的函数指针 */
 #undef _TSK_CFG_
 #undef STDTASKDEF
-#define STDTASKDEF( osName, Mode, Prio, stack,  dtqdepth) \
+#define STDTASKDEF(osName, Prio, StackDepth) \
    static TCfTaskFunc       pFunc##osName;          \
    static TCfHandleMsgFunc  pMsgFunc##osName;
 #include "tsk.h"
@@ -31,7 +31,7 @@ u32 cfThreadInit(void)
     */
 #undef _TSK_CFG_
 #undef STDTASKDEF
-#define STDTASKDEF(osName, Mode, Prio, stack,  dtqdepth)  \
+#define STDTASKDEF(osName, Prio, StackDepth)  \
     pFunc##osName = NULL;                  \
     pMsgFunc##osName = NULL;
 #include "tsk.h"
@@ -51,7 +51,7 @@ u32 cfThreadInit(void)
     */
 #undef _TSK_CFG_
 #undef STDTASKDEF
-#define STDTASKDEF(osName, mode, Prio, stack, dtqdepth) \
+#define STDTASKDEF(osName, Prio, StackDepth) \
     osName##_Create();
 #include "tsk.h"
 #undef STDTASKDEF
@@ -70,7 +70,7 @@ void cfThreadCreate(u8 tskId, TCfTaskFunc func, TCfHandleMsgFunc msgFunc)
 {
 #undef _TSK_CFG_
 #undef STDTASKDEF
-#define STDTASKDEF(osName, Mode, Prio, stack,  dtqdepth) \
+#define STDTASKDEF(osName, Prio, StackDepth) \
 	      if(TID_##osName == tskId)                 \
 	      {                                         \
 	         pFunc##osName = func;                  \
@@ -104,7 +104,7 @@ u32 cfThreadWaitWithTimeout(u32 signals, u16 timeout)
             {
 #undef _TSK_CFG_
 #undef STDTASKDEF
-#define STDTASKDEF(osName, Mode, Prio, stack,  dtqdepth)                           \
+#define STDTASKDEF(osName, Prio, StackDepth)                           \
                 case (TID_##osName):                                      \
                 {                                                         \
                     if(pMsgFunc##osName)                                  \
@@ -131,7 +131,7 @@ u32 cfThreadWaitWithTimeout(u32 signals, u16 timeout)
 /*---------------------------------------------------------------------------
  * Task functions
  *---------------------------------------------------------------------------*/
-#define STDTASKDEF(osName, Mode, Prio, stack,  dtqdepth)                                                 \
+#define STDTASKDEF(osName, Prio, StackDepth)                                                 \
    void osName##_Task(u32 exinf)                                                                \
    {                                                                                            \
 	  osName##_Init();                                                                          \

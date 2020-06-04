@@ -12,6 +12,7 @@ UART_HandleTypeDef UART1_Handler;
 
 void Uart1_TxIntHandle(void)
 {
+	OSIF_EVSendTask(TASK_NAME(Uart1), EVENT_Uart1_TX_FINISH);
 
 }
 
@@ -37,7 +38,7 @@ void uart1_init(void *Uart1_TxHandle, void *Uart1_RxHandle)
 	
 	HAL_UART_Receive_IT(&UART1_Handler);//使能接收中断和错误中断：UART_IT_RXNE
 
-	fifo_Init(&Uart1_RxData_fifo, Uart1_RxDataBuffer, 256);
+	fifo_Init(&Uart1_RxData_fifo, &Uart1_RxDataBuffer[0], 256);
 
 }
 
@@ -52,7 +53,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 	}
 }
 
-u8 USART1_SendData(u8 *pData, u16 len)
+static u8 USART1_SendData(u8 *pData, u16 len)
 {
 	/*该函数把数据填充到发送数据缓冲区之后,会开启UART_IT_TXE,会触发发送中断,然后进入 UART_Transmit_IT 进行处理*/
 	return HAL_UART_Transmit_IT(&UART1_Handler,pData,len);
@@ -64,14 +65,14 @@ void USART1_IRQHandler(void)
 } 
 
 
-void Uart1_RxDataHandle(u8* pData)
+u8 *USART1_RxDataHandle(u8* pData)
 {
-
+	return &Uart1_CurrentRxBuf[0];
 }
 
 
-/*周期调用接收*/
-void USART1_RxDataParse(void)
+/*周期调用接收 , 通过此函数将数据解析,然后发送到需要处理的任务模块邮箱*/
+static void USART1_RxDataParse(void)
 {
 	u32 RxLength = 0;
 
@@ -99,12 +100,51 @@ void USART1_RxDataParse(void)
 	/*add debug log*/
 
 	/*Rx data handle*/
-    Uart1_RxDataHandle(&Uart1_CurrentRxBuf[0]);
+    USART1_RxDataHandle(&Uart1_CurrentRxBuf[0]);
 }
 
 
+void USART1_SendDataManage(void)
+{
+	u16 len = 0;
+	u16 SendLen = 0;
+	
+		len = fifo_GetLen(&DispTxData_fifo);
+		
+		if(len == 0)
+		{
+			return;
+		}
+		
+		if(len >= DISP_CURRENT_TX_LEN)
+		{
+			SendLen = DISP_CURRENT_TX_LEN;
+		}
+		else
+		{
+			SendLen = len;
+		}
 
- 
+		fifo_retrieve(&DispTxData_fifo, &DispCurrentTxBuf[0], SendLen);
+
+		USART1_SendData(&DispCurrentTxBuf[0], SendLen);
+
+}
+
+
+/*重发数据管理*/
+static void USART1_ResendManage(u16 Tick)
+{
+
+}
+
+void USART1_ManageProc(u16 Tick)
+{
+	USART1_ResendManage(Tick);
+
+	USART1_RxDataParse();
+
+}
 
 
 
