@@ -191,9 +191,9 @@ use of FreeRTOS.*/
 struct xLIST_ITEM
 {
 	listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE			/*< 用于检测列表项数据是否完整 /Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-	configLIST_VOLATILE TickType_t xItemValue;			/*< 列表项值 /The value being listed.  In most cases this is used to sort the list in descending order. */
-	struct xLIST_ITEM * configLIST_VOLATILE pxNext;		/*< 指向列表中下一个列表项 /Pointer to the next ListItem_t in the list. */
-	struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;	/*< 指向列表中上一个列表项 /Pointer to the previous ListItem_t in the list. */
+	configLIST_VOLATILE TickType_t xItemValue;			/*< 列表项的值 /The value being listed.  In most cases this is used to sort the list in descending order. */
+	struct xLIST_ITEM * configLIST_VOLATILE pxNext;		/*< 指向列表中下一个链表项 /Pointer to the next ListItem_t in the list. */
+	struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;	/*< 指向列表中上一个链表项 /Pointer to the previous ListItem_t in the list. */
 	void * pvOwner;										/*< 指向一个任务TCB /Pointer to the object (normally a TCB) that contains the list item.  There is therefore a two way link between the object containing the list item and the list item itself. */
 	void * configLIST_VOLATILE pvContainer;				/*< 指向包含该列表项的列表 /Pointer to the list in which this list item is placed (if any). */
 	listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE			/*< 用于检测列表项数据是否完整 /Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */

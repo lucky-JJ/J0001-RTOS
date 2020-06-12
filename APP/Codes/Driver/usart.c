@@ -44,13 +44,7 @@ void uart1_init(void *Uart1_TxHandle, void *Uart1_RxHandle)
 
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 {
-	if(huart->Instance==USART1)//如果是串口1，进行串口1 MSP初始化
-	{
-		__HAL_RCC_USART1_CLK_ENABLE();		//使能USART1时钟
-	
-		HAL_NVIC_EnableIRQ(USART1_IRQn);	//使能USART1中断通道
-		HAL_NVIC_SetPriority(USART1_IRQn,3,3); //抢占优先级3，子优先级3
-	}
+
 }
 
 static u8 USART1_SendData(u8 *pData, u16 len)
@@ -99,6 +93,8 @@ static void USART1_RxDataParse(void)
 
 	/*add debug log*/
 
+	/*send　ack*/
+
 	/*Rx data handle*/
     USART1_RxDataHandle(&Uart1_CurrentRxBuf[0]);
 }
@@ -143,7 +139,6 @@ void USART1_ManageProc(u16 Tick)
 	USART1_ResendManage(Tick);
 
 	USART1_RxDataParse();
-
 }
 
 

@@ -1,4 +1,6 @@
 #include "sys.h"
+#include "task.h"
+
 //////////////////////////////////////////////////////////////////////////////////	 
 ////////////////////////////////////////////////////////////////////////////////// 
 
@@ -34,8 +36,8 @@ STM32 有4个独立时钟源:HSI、HSE、LSI、LSE。
 //得到:Fvco=25*(360/25)=360Mhz
 //     SYSCLK=360/2=180Mhz
 //     Fusb=360/8=45Mhz
-//返回值:0,成功;1,失败
-void Stm32_Clock_Init(u32 plln,u32 pllm,u32 pllp,u32 pllq)
+//返回值:0,成功;1,失败  
+void Clock_Init(void)
 {
     HAL_StatusTypeDef ret = HAL_OK;
     RCC_OscInitTypeDef RCC_OscInitStructure; 
@@ -51,10 +53,10 @@ void Stm32_Clock_Init(u32 plln,u32 pllm,u32 pllp,u32 pllq)
     RCC_OscInitStructure.HSEState=RCC_HSE_ON;                      //打开HSE
     RCC_OscInitStructure.PLL.PLLState=RCC_PLL_ON;//打开PLL
     RCC_OscInitStructure.PLL.PLLSource=RCC_PLLSOURCE_HSE;//PLL时钟源选择HSE
-    RCC_OscInitStructure.PLL.PLLM=pllm; //主PLL和音频PLL分频系数(PLL之前的分频),取值范围:2~63.
-    RCC_OscInitStructure.PLL.PLLN=plln; //主PLL倍频系数(PLL倍频),取值范围:64~432.  
-    RCC_OscInitStructure.PLL.PLLP=pllp; //系统时钟的主PLL分频系数(PLL之后的分频),取值范围:2,4,6,8.(仅限这4个值!)
-    RCC_OscInitStructure.PLL.PLLQ=pllq; //USB/SDIO/随机数产生器等的主PLL分频系数(PLL之后的分频),取值范围:2~15.
+    RCC_OscInitStructure.PLL.PLLM = 25; //主PLL和音频PLL分频系数(PLL之前的分频),取值范围:2~63.
+    RCC_OscInitStructure.PLL.PLLN = 360; //主PLL倍频系数(PLL倍频),取值范围:64~432.  
+    RCC_OscInitStructure.PLL.PLLP = 2; //系统时钟的主PLL分频系数(PLL之后的分频),取值范围:2,4,6,8.(仅限这4个值!)
+    RCC_OscInitStructure.PLL.PLLQ = 8; //USB/SDIO/随机数产生器等的主PLL分频系数(PLL之后的分频),取值范围:2~15.
     ret=HAL_RCC_OscConfig(&RCC_OscInitStructure);//初始化
 	
     if(ret!=HAL_OK) while(1);
@@ -74,10 +76,37 @@ void Stm32_Clock_Init(u32 plln,u32 pllm,u32 pllp,u32 pllq)
 }
 
 
+void IRQ_Manage(void)
+{
+	/*外设时钟必须在初始化外设之前配置*/
+
+	/*uart1*/
+	__HAL_RCC_USART1_CLK_ENABLE();		//使能USART1时钟
+	
+	HAL_NVIC_EnableIRQ(USART1_IRQn);	//使能USART1中断通道
+	HAL_NVIC_SetPriority(USART1_IRQn,3,3); //抢占优先级3，子优先级3
+
+	/*SPI*/
+	__HAL_RCC_SPI5_CLK_ENABLE();
 
 
 
+	
+}
 
+
+
+extern void xPortSysTickHandler(void);
+//systick中断服务函数,使用OS时用到,嘀嗒定时器 ,1ms 进入一次
+void SysTick_Handler(void)
+{  
+    if(xTaskGetSchedulerState()!=taskSCHEDULER_NOT_STARTED)//系统已经运行
+    {
+        xPortSysTickHandler();	
+    }
+    HAL_IncTick();
+}
+	
 
 
 

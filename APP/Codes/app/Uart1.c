@@ -1,10 +1,11 @@
 #include "osal.h"
 #include "osif_freertos.h"
 #include "app.h"
-#include "sys.h"
+
 #include "EventDefine.h"
 #include "cychdr.h"
 #include "usart.h"
+#include "MsgDefine.h"
 
 
 
@@ -21,6 +22,23 @@ s32 SendMsgToUart1Manage(u8 *MsgData, u16 MsgLen)
 void Uart1Manage_MsgHandle(void *pbuf, u16 buflen)
 {
 	/* 消息内容都是从邮箱取的 */
+
+    Message_t *pMsg_t;
+
+
+    pMsg_t = (Message_t *)pbuf;
+
+    if(pMsg_t != 0)
+    {
+        switch(pMsg_t->Type)
+        {
+            case EVENT_SEND_DATA_TO_UART1:
+            {
+                /*其他任务发消息过来这里,通过这里把数据用串口发出去*/
+               CommCmdDataCoderAndSend(pMsg_t);
+                
+            }
+
 
 }
 

@@ -59,6 +59,10 @@ with open("./Pin/GPIO.c", 'w') as fp:
 	fp.write('		{\n')
 	fp.write('			__HAL_RCC_GPIOH_CLK_ENABLE();\n')
 	fp.write('		}\n')
+	fp.write('		else if(config[i].base == GPIOF)\n')
+	fp.write('		{\n')
+	fp.write('			__HAL_RCC_GPIOF_CLK_ENABLE();\n')
+	fp.write('		}\n')
 	fp.write('		else{}\n\n')
 
 	fp.write('    	GPIO_Initure.base 		= config[i].base;\n')

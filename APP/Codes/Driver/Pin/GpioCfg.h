@@ -3,7 +3,7 @@
 
 #include "sys.h"
 
-#define  NUM_OF_CONFIGURED_PINS      (10)
+#define  NUM_OF_CONFIGURED_PINS      (14)
 
 typedef struct
 {
@@ -18,6 +18,10 @@ typedef enum {
     IO_LED1,
     IO_LED0,
     IO_KEY2,
+    IO_F_CS,
+    IO_SPI5_SCK,
+    IO_SPI5_MISO,
+    IO_SPI5_MOSI,
     IO_KEY1,
     IO_KEY0,
     IO_IIC_SCL,

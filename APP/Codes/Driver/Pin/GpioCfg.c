@@ -59,6 +59,42 @@ const GPIO_InitTypeDef Gpio_InitConfigArr[NUM_OF_CONFIGURED_PINS] =
         .Alternate = 0,
     },
     {
+         /*IO_F_CS */
+        .base = GPIOF,
+        .Pin = 6,
+        .Pull = GPIO_PULLUP,
+        .Mode = GPIO_MODE_OUTPUT_PP,
+        .Speed = GPIO_SPEED_FAST,
+        .Alternate = 0,
+    },
+    {
+         /*IO_SPI5_SCK */
+        .base = GPIOF,
+        .Pin = 7,
+        .Pull = GPIO_PULLUP,
+        .Mode = GPIO_MODE_AF_PP,
+        .Speed = GPIO_SPEED_FAST,
+        .Alternate = 5,
+    },
+    {
+         /*IO_SPI5_MISO */
+        .base = GPIOF,
+        .Pin = 8,
+        .Pull = GPIO_PULLUP,
+        .Mode = GPIO_MODE_AF_PP,
+        .Speed = GPIO_SPEED_FAST,
+        .Alternate = 5,
+    },
+    {
+         /*IO_SPI5_MOSI */
+        .base = GPIOF,
+        .Pin = 9,
+        .Pull = GPIO_PULLUP,
+        .Mode = GPIO_MODE_AF_PP,
+        .Speed = GPIO_SPEED_FAST,
+        .Alternate = 5,
+    },
+    {
          /*IO_KEY1 */
         .base = GPIOH,
         .Pin = 2,
@@ -103,6 +139,10 @@ const PinNameSt IoTable[]  = {
     {GPIOB, 0},		/* IO_LED1 */
     {GPIOB, 1},		/* IO_LED0 */
     {GPIOC, 13},		/* IO_KEY2 */
+    {GPIOF, 6},		/* IO_F_CS */
+    {GPIOF, 7},		/* IO_SPI5_SCK */
+    {GPIOF, 8},		/* IO_SPI5_MISO */
+    {GPIOF, 9},		/* IO_SPI5_MOSI */
     {GPIOH, 2},		/* IO_KEY1 */
     {GPIOH, 3},		/* IO_KEY0 */
     {GPIOH, 4},		/* IO_IIC_SCL */

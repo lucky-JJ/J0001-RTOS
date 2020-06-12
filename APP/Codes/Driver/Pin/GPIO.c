@@ -40,6 +40,10 @@ void Gpio_Init(const GPIO_InitTypeDef *config)
 		{
 			__HAL_RCC_GPIOH_CLK_ENABLE();
 		}
+		else if(config[i].base == GPIOF)
+		{
+			__HAL_RCC_GPIOF_CLK_ENABLE();
+		}
 		else{}
 
     	GPIO_Initure.base 		= config[i].base;

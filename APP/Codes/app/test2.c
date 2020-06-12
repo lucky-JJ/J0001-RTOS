@@ -4,6 +4,7 @@
 #include "sys.h"
 #include "EventDefine.h"
 #include "cychdr.h"
+#include "led.h"
 
 
 
@@ -45,7 +46,7 @@ void LedManage_Func(void)
 
 TASK_INIT(Led)
 {
-
+	LED_Init();
 
 	enableCycleEvent((TASK_NAME(Led)));
 

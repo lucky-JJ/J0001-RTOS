@@ -83,6 +83,26 @@ typedef enum
     #define  NULL       ((u8) 0)
 #endif
 
+typedef enum
+{
+    MSG_EMPTY_SIG = 0,
+    MSG_ENTRY_SIG,                        /**< signal for coding entry actions */
+    MSG_EXIT_SIG,                         /**< signal for coding exit actions */
+    MSG_INIT_SIG,                         /**< signal for coding initial transitions */
+    MSG_USER_DEFINE,
+} EnumReservedMsg_t;
+
+
+typedef u16 MsgSize_t;
+
+typedef struct EventTag
+{
+    volatile MsgSize_t  Type;
+    u8 _Reserved[2];
+} Message_t;
+
+
+
 
 
 
@@ -161,7 +181,7 @@ typedef enum
 #define PKout(n)   BIT_ADDR(GPIOK_ODR_Addr,n)  //输出 
 #define PKin(n)    BIT_ADDR(GPIOK_IDR_Addr,n)  //输入
 
-void Stm32_Clock_Init(u32 plln,u32 pllm,u32 pllp,u32 pllq);//时钟系统配置
+void Clock_Init(void);//时钟系统配置
 //以下为汇编函数
 void WFI_SET(void);		//执行WFI指令
 void INTX_DISABLE(void);//关闭所有中断

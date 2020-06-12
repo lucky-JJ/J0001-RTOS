@@ -2,7 +2,7 @@
 #include "sys.h"
 #include "delay.h"
 #include "usart.h"
-#include "led.h"
+//#include "led.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -22,15 +22,13 @@
 */
 int main(void)
 {
-    HAL_Init();                     //初始化HAL库
-    Stm32_Clock_Init(360,25,2,8);   //设置时钟,180Mhz
+    HAL_Init();
+	
+    Clock_Init();
 
 	Gpio_Init(&Gpio_InitConfigArr[0]);
 
-	delay_init(180);                //初始化延时函数
-    LED_Init();                     //初始化LED
-    
-
+	IRQ_Manage();
 
 	//Bsp_Init();
 

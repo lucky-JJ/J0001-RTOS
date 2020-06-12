@@ -174,59 +174,66 @@ static HAL_StatusTypeDef SPI_WaitOnFlagUntilTimeout(SPI_HandleTypeDef *hspi, uin
   */
 HAL_StatusTypeDef HAL_SPI_Init(SPI_HandleTypeDef *hspi)
 {
-  /* Check the SPI handle allocation */
-  if(hspi == NULL)
-  {
-    return HAL_ERROR;
-  }
+	/* Check the SPI handle allocation */
+	if(hspi == NULL)
+	{
+	return HAL_ERROR;
+	}
 
-  /* Check the parameters */
-  assert_param(IS_SPI_MODE(hspi->Init.Mode));
-  assert_param(IS_SPI_DIRECTION_MODE(hspi->Init.Direction));
-  assert_param(IS_SPI_DATASIZE(hspi->Init.DataSize));
-  assert_param(IS_SPI_CPOL(hspi->Init.CLKPolarity));
-  assert_param(IS_SPI_CPHA(hspi->Init.CLKPhase));
-  assert_param(IS_SPI_NSS(hspi->Init.NSS));
-  assert_param(IS_SPI_BAUDRATE_PRESCALER(hspi->Init.BaudRatePrescaler));
-  assert_param(IS_SPI_FIRST_BIT(hspi->Init.FirstBit));
-  assert_param(IS_SPI_TIMODE(hspi->Init.TIMode));
-  assert_param(IS_SPI_CRC_CALCULATION(hspi->Init.CRCCalculation));
-  assert_param(IS_SPI_CRC_POLYNOMIAL(hspi->Init.CRCPolynomial));
+	/* Check the parameters */
+	assert_param(IS_SPI_MODE(hspi->Init.Mode));
+	assert_param(IS_SPI_DIRECTION_MODE(hspi->Init.Direction));
+	assert_param(IS_SPI_DATASIZE(hspi->Init.DataSize));
+	assert_param(IS_SPI_CPOL(hspi->Init.CLKPolarity));
+	assert_param(IS_SPI_CPHA(hspi->Init.CLKPhase));
+	assert_param(IS_SPI_NSS(hspi->Init.NSS));
+	assert_param(IS_SPI_BAUDRATE_PRESCALER(hspi->Init.BaudRatePrescaler));
+	assert_param(IS_SPI_FIRST_BIT(hspi->Init.FirstBit));
+	assert_param(IS_SPI_TIMODE(hspi->Init.TIMode));
+	assert_param(IS_SPI_CRC_CALCULATION(hspi->Init.CRCCalculation));
+	assert_param(IS_SPI_CRC_POLYNOMIAL(hspi->Init.CRCPolynomial));
 
-  if(hspi->State == HAL_SPI_STATE_RESET)
-  {
-    /* Allocate lock resource and initialize it */
-    hspi->Lock = HAL_UNLOCKED;
-    /* Init the low level hardware : GPIO, CLOCK, NVIC... */
-    HAL_SPI_MspInit(hspi);
-  }
-  
-  hspi->State = HAL_SPI_STATE_BUSY;
+	if(hspi->State == HAL_SPI_STATE_RESET)
+	{
+	/* Allocate lock resource and initialize it */
+	hspi->Lock = HAL_UNLOCKED;
+	/* Init the low level hardware : GPIO, CLOCK, NVIC... */
+	HAL_SPI_MspInit(hspi);
+	}
+
+	hspi->State = HAL_SPI_STATE_BUSY;
 
   /* Disable the selected SPI peripheral */
-  __HAL_SPI_DISABLE(hspi);
+	__HAL_SPI_DISABLE(hspi);
 
-  /*----------------------- SPIx CR1 & CR2 Configuration ---------------------*/
-  /* Configure : SPI Mode, Communication Mode, Data size, Clock polarity and phase, NSS management,
-  Communication speed, First bit and CRC calculation state */
-  hspi->Instance->CR1 = (hspi->Init.Mode | hspi->Init.Direction | hspi->Init.DataSize |
+	/*----------------------- SPIx CR1 & CR2 Configuration ---------------------*/
+	/* Configure : SPI Mode, Communication Mode, Data size, Clock polarity and phase, NSS management,
+	Communication speed, First bit and CRC calculation state */
+	hspi->Instance->CR1 = (hspi->Init.Mode | hspi->Init.Direction | hspi->Init.DataSize |
                          hspi->Init.CLKPolarity | hspi->Init.CLKPhase | (hspi->Init.NSS & SPI_CR1_SSM) |
                          hspi->Init.BaudRatePrescaler | hspi->Init.FirstBit  | hspi->Init.CRCCalculation);
 
-  /* Configure : NSS management */
-  hspi->Instance->CR2 = (((hspi->Init.NSS >> 16) & SPI_CR2_SSOE) | hspi->Init.TIMode);
 
-  /*---------------------------- SPIx CRCPOLY Configuration ------------------*/
-  /* Configure : CRC Polynomial */
-  hspi->Instance->CRCPR = hspi->Init.CRCPolynomial;
 
-  /* Activate the SPI mode (Make sure that I2SMOD bit in I2SCFGR register is reset) */
-  hspi->Instance->I2SCFGR &= (uint32_t)(~SPI_I2SCFGR_I2SMOD);
+	hspi->Instance->CR1 &= 0XFFC7;          //位3-5清零，用来设置波特率
+	hspi->Instance->CR1 |= SPI_BAUDRATEPRESCALER_2;//设置SPI速度
 
-  hspi->ErrorCode = HAL_SPI_ERROR_NONE;
-  hspi->State = HAL_SPI_STATE_READY;
-  
-  return HAL_OK;
+	/* Configure : NSS management */
+	hspi->Instance->CR2 = (((hspi->Init.NSS >> 16) & SPI_CR2_SSOE) | hspi->Init.TIMode);
+
+	/*---------------------------- SPIx CRCPOLY Configuration ------------------*/
+	/* Configure : CRC Polynomial */
+	hspi->Instance->CRCPR = hspi->Init.CRCPolynomial;
+
+	/* Activate the SPI mode (Make sure that I2SMOD bit in I2SCFGR register is reset) */
+	hspi->Instance->I2SCFGR &= (uint32_t)(~SPI_I2SCFGR_I2SMOD);
+
+	hspi->ErrorCode = HAL_SPI_ERROR_NONE;
+	hspi->State = HAL_SPI_STATE_READY;
+
+	__HAL_SPI_ENABLE(hspi);//add by J
+
+	return HAL_OK;
 }
 
 /**
@@ -778,7 +785,8 @@ HAL_StatusTypeDef HAL_SPI_TransmitReceive(SPI_HandleTypeDef *hspi, uint8_t *pTxD
     }
     /* Transmit and Receive data in 8 Bit mode */
     else
-    {
+    {	
+      /* 8 bit 模式下 发送一个字节处理 */
       if((hspi->Init.Mode == SPI_MODE_SLAVE) || ((hspi->Init.Mode == SPI_MODE_MASTER) && (hspi->TxXferCount == 0x01)))
       {
         hspi->Instance->DR = (*hspi->pTxBuffPtr++);
@@ -805,7 +813,7 @@ HAL_StatusTypeDef HAL_SPI_TransmitReceive(SPI_HandleTypeDef *hspi, uint8_t *pTxD
       {
         while(hspi->TxXferCount > 0)
         {
-          /* Wait until TXE flag is set to send data */
+          /* Wait until TXE flag is set to send data ,发送缓冲区为空 */
           if(SPI_WaitOnFlagUntilTimeout(hspi, SPI_FLAG_TXE, RESET, Timeout) != HAL_OK)
           {
             return HAL_TIMEOUT;
