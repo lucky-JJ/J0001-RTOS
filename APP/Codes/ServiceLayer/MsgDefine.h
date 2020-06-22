@@ -10,6 +10,7 @@ typedef enum
     EVENT_VEHICLEIO_SEND_ASTERN_DATA,                	/*6*/
     EVENT_VEHICLEIO_SEND_AVN_DATA,                   	/*7*/
     EVENT_VEHICLEIO_SEND_ILL_LEVEL_DATA,             	/*8*/
+    EVENT_KEY_SWITCH_REQ,								/*9*/
 
     EVENT_MAX_CMD,
 } EnumSysMsgTb_t;

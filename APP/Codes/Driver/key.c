@@ -1,6 +1,11 @@
 #include "key.h"
 #include "delay.h"
+#include "MsgDefine.h"
 
+static u8 	KeyState = KEY_IDLE;
+static u8 	KeyCurState = 0xFF;
+static u8 	KeyLastState = 0xFF;
+static u16 	keycount = 0;
 
 
 
@@ -25,3 +30,116 @@ u8 KEY_Scan(u8 mode)
     }else if(KEY0==1&&KEY1==1&&KEY2==1&&WK_UP==0)key_up=1;
     return 0;   //无按键按下
 }
+
+static u8 GetKeyState(u8 state)
+{
+	switch (KeyState)
+	{
+		case KEY_IDLE:
+			 if(state == 1)
+			 {					   
+			   keycount++;
+			   if(keycount >= 5)
+			   {
+				   KeyState =KEY_PRESS;
+				   keycount = 0;				 
+				}					 
+			 }
+		break;
+
+		 case KEY_PRESS:
+			   if(state == 0)
+			   {
+				   keycount++;
+					if(keycount >= 5)
+					{
+						KeyState =KEY_RELEASE;
+						keycount = 0;
+					
+					}
+			   }
+		 break;
+
+		 case KEY_RELEASE:
+			 KeyState = KEY_IDLE;
+
+		 break;
+		 default:			 
+			 KeyState = KEY_IDLE;
+			 break;
+	}
+
+    if(gucAvnKeyStat == KEY_PRESS)
+    {
+        KeyCurState = 1;
+    }
+    else if(gucAvnKeyStat == KEY_RELEASE)
+    {
+        KeyCurState = 0;
+    }
+
+	return 0;
+}
+
+
+
+
+void KeyStatusCheckProc(void)
+{
+	u8 i = 0;
+				KeyData_t  KeyReqMsg;
+
+			KeyReqMsg.Type = EVENT_KEY_SWITCH_REQ;
+	
+	for(i = 0; i < KEY_NUMBER ; i++)
+	{
+		GetKeyState(Key[i]);
+	
+	
+
+		if(KeyCurState[i] != KeyLastState[i] && KeyCurState[i] != 0xFF)
+		{
+
+			KeyReqMsg.Key0
+			SendMsgToLedManage((u8 *)&KeyReqMsg, sizeof(Message_t));
+			//DEBUG_MCU(DBG_INFO, VEH_MODULE_ID, "AVN Key Press\r\n");
+			
+			KeyLastState[i] = KeyCurState[i];
+		}
+
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

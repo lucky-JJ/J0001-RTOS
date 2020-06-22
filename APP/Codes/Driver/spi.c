@@ -7,6 +7,8 @@
 	SPI 是英语 Serial Peripheral interface 的缩写，顾名思义就是串行外围设备接口。
 	SPI 接口主要应用在 EEPROM， FLASH，实时时钟， AD 转换器，还有数字信号处理器和数字信号解码器之间。 
 	SPI，是一种高速的，全双工，同步的通信总线
+
+	注:如果应用中必须使用高速数据传输，那么SPI是必然的选择。因为SPI是全双工，IIC的不是。
 	
 1. 采用主-从模式(Master-Slave) 的控制方式
 	SPI 规定了两个 SPI 设备之间通信必须由主设备 (Master) 来控制次设备 (Slave). 一个 Master 设备可以通过提供
@@ -136,12 +138,6 @@ u8 SPI5_ReadWriteByte(u8 TxData)
  	return Rxdata;          		    //返回收到的数据		
 }
 
-u8 SPI5_ReadWriteByte(u8 *TxData , u16 len)
-{
-    u8 Rxdata;
-    HAL_SPI_TransmitReceive(&SPI5_Handler,&TxData,&Rxdata,len, 1000);       
- 	return Rxdata;
-}
 
 
 

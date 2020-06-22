@@ -14,6 +14,39 @@
 #define KEY2_PRES		3
 #define WKUP_PRES   4
 
+#define KEY_NUMBER 4
+
+u8 const Key[KEYNUMBER] = \
+{
+	GPIO_Read(IO_KEY0),
+	GPIO_Read(IO_KEY1),
+	GPIO_Read(IO_KEY2),
+	GPIO_Read(IO_WK_UP),
+}
+
+typedef enum
+{
+    KEY_IDLE,
+    KEY_PRESS,
+    KEY_SINGLE,
+    KEY_LONGPRESS,
+    KEY_LONGPRESS_CONTINUE,
+    KEY_RELEASE,
+} Enum_Key_State;
+
+typedef struct {
+    Message_t   Msg;
+    u8          Key0:2;
+	u8          Key1:2;
+	u8			Key2:2;
+	u8          Key_WK_UP:2;
+} KeyData_t;
+
+
 
 u8 KEY_Scan(u8 mode);
+
+void KeyStatusCheckProc(void);
+
+
 #endif
