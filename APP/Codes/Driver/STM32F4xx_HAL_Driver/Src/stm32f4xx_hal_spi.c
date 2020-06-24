@@ -930,8 +930,8 @@ HAL_StatusTypeDef HAL_SPI_Transmit_IT(SPI_HandleTypeDef *hspi, uint8_t *pData, u
     hspi->State        = HAL_SPI_STATE_BUSY_TX;
     hspi->ErrorCode    = HAL_SPI_ERROR_NONE;
 
-    hspi->TxISR = &SPI_TxISR;
-    hspi->pTxBuffPtr   = pData;
+    hspi->TxISR = &SPI_TxISR;//注册,在下面使能 SPI_IT_TXE 中断位,在中断中处理数据填充DR
+    hspi->pTxBuffPtr   = pData;//数据填充缓冲区
     hspi->TxXferSize   = Size;
     hspi->TxXferCount  = Size;
 
