@@ -1,86 +1,74 @@
 #include "adc.h"
 #include "delay.h"
-//////////////////////////////////////////////////////////////////////////////////	 
-//±¾³ÌĞòÖ»¹©Ñ§Ï°Ê¹ÓÃ£¬Î´¾­×÷ÕßĞí¿É£¬²»µÃÓÃÓÚÆäËüÈÎºÎÓÃÍ¾
-//ALIENTEK STM32F429¿ª·¢°å
-//ADCÇı¶¯´úÂë	   
-//ÕıµãÔ­×Ó@ALIENTEK
-//¼¼ÊõÂÛÌ³:www.openedv.com
-//´´½¨ÈÕÆÚ:2016/1/13
-//°æ±¾£ºV1.0
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ¹ãÖİÊĞĞÇÒíµç×Ó¿Æ¼¼ÓĞÏŞ¹«Ë¾ 2014-2024
-//All rights reserved									  
-////////////////////////////////////////////////////////////////////////////////// 	
 
-ADC_HandleTypeDef ADC1_Handler;//ADC¾ä±ú
+ADC_HandleTypeDef ADC1_Handler; //ADCå¥æŸ„
 
-//³õÊ¼»¯ADC
-//ch: ADC_channels 
-//Í¨µÀÖµ 0~16È¡Öµ·¶Î§Îª£ºADC_CHANNEL_0~ADC_CHANNEL_16
+//åˆå§‹åŒ–ADC
+//ch: ADC_channels
+//é€šé“å€¼ 0~16å–å€¼èŒƒå›´ä¸ºï¼šADC_CHANNEL_0~ADC_CHANNEL_16
 void MY_ADC_Init(void)
-{ 
-    ADC1_Handler.Instance=ADC1;
-    ADC1_Handler.Init.ClockPrescaler=ADC_CLOCK_SYNC_PCLK_DIV4;   //4·ÖÆµ£¬ADCCLK=PCLK2/4=90/4=22.5MHZ
-    ADC1_Handler.Init.Resolution=ADC_RESOLUTION_12B;             //12Î»Ä£Ê½
-    ADC1_Handler.Init.DataAlign=ADC_DATAALIGN_RIGHT;             //ÓÒ¶ÔÆë
-    ADC1_Handler.Init.ScanConvMode=DISABLE;                      //·ÇÉ¨ÃèÄ£Ê½
-    ADC1_Handler.Init.EOCSelection=DISABLE;                      //¹Ø±ÕEOCÖĞ¶Ï
-    ADC1_Handler.Init.ContinuousConvMode=DISABLE;                //¹Ø±ÕÁ¬Ğø×ª»»
-    ADC1_Handler.Init.NbrOfConversion=1;                         //1¸ö×ª»»ÔÚ¹æÔòĞòÁĞÖĞ Ò²¾ÍÊÇÖ»×ª»»¹æÔòĞòÁĞ1 
-    ADC1_Handler.Init.DiscontinuousConvMode=DISABLE;             //½ûÖ¹²»Á¬Ğø²ÉÑùÄ£Ê½
-    ADC1_Handler.Init.NbrOfDiscConversion=0;                     //²»Á¬Ğø²ÉÑùÍ¨µÀÊıÎª0
-    ADC1_Handler.Init.ExternalTrigConv=ADC_SOFTWARE_START;       //Èí¼ş´¥·¢
-    ADC1_Handler.Init.ExternalTrigConvEdge=ADC_EXTERNALTRIGCONVEDGE_NONE;//Ê¹ÓÃÈí¼ş´¥·¢
-    ADC1_Handler.Init.DMAContinuousRequests=DISABLE;             //¹Ø±ÕDMAÇëÇó
-    HAL_ADC_Init(&ADC1_Handler);                                 //³õÊ¼»¯ 
+{
+    ADC1_Handler.Instance = ADC1;
+    ADC1_Handler.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;            //4åˆ†é¢‘ï¼ŒADCCLK=PCLK2/4=90/4=22.5MHZ
+    ADC1_Handler.Init.Resolution = ADC_RESOLUTION_12B;                      //12ä½æ¨¡å¼
+    ADC1_Handler.Init.DataAlign = ADC_DATAALIGN_RIGHT;                      //å³å¯¹é½
+    ADC1_Handler.Init.ScanConvMode = DISABLE;                               //éæ‰«ææ¨¡å¼
+    ADC1_Handler.Init.EOCSelection = DISABLE;                               //å…³é—­EOCä¸­æ–­
+    ADC1_Handler.Init.ContinuousConvMode = DISABLE;                         //å…³é—­è¿ç»­è½¬æ¢
+    ADC1_Handler.Init.NbrOfConversion = 1;                                  //1ä¸ªè½¬æ¢åœ¨è§„åˆ™åºåˆ—ä¸­ ä¹Ÿå°±æ˜¯åªè½¬æ¢è§„åˆ™åºåˆ—1
+    ADC1_Handler.Init.DiscontinuousConvMode = DISABLE;                      //ç¦æ­¢ä¸è¿ç»­é‡‡æ ·æ¨¡å¼
+    ADC1_Handler.Init.NbrOfDiscConversion = 0;                              //ä¸è¿ç»­é‡‡æ ·é€šé“æ•°ä¸º0
+    ADC1_Handler.Init.ExternalTrigConv = ADC_SOFTWARE_START;                //è½¯ä»¶è§¦å‘
+    ADC1_Handler.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE; //ä½¿ç”¨è½¯ä»¶è§¦å‘
+    ADC1_Handler.Init.DMAContinuousRequests = DISABLE;                      //å…³é—­DMAè¯·æ±‚
+    HAL_ADC_Init(&ADC1_Handler);                                            //åˆå§‹åŒ–
 }
 
-//ADCµ×²ãÇı¶¯£¬Òı½ÅÅäÖÃ£¬Ê±ÖÓÊ¹ÄÜ
-//´Ëº¯Êı»á±»HAL_ADC_Init()µ÷ÓÃ
-//hadc:ADC¾ä±ú
-void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
+//ADCåº•å±‚é©±åŠ¨ï¼Œå¼•è„šé…ç½®ï¼Œæ—¶é’Ÿä½¿èƒ½
+//æ­¤å‡½æ•°ä¼šè¢«HAL_ADC_Init()è°ƒç”¨
+//hadc:ADCå¥æŸ„
+void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 {
     GPIO_InitTypeDef GPIO_Initure;
-    __HAL_RCC_ADC1_CLK_ENABLE();            //Ê¹ÄÜADC1Ê±ÖÓ
-    __HAL_RCC_GPIOA_CLK_ENABLE();			//¿ªÆôGPIOAÊ±ÖÓ
-	
-    GPIO_Initure.Pin=GPIO_PIN_5;            //PA5
-    GPIO_Initure.Mode=GPIO_MODE_ANALOG;     //Ä£Äâ
-    GPIO_Initure.Pull=GPIO_NOPULL;          //²»´øÉÏÏÂÀ­
-    HAL_GPIO_Init(GPIOA,&GPIO_Initure);
+    //    __HAL_RCC_ADC1_CLK_ENABLE();            //ä½¿èƒ½ADC1æ—¶é’Ÿ
+    //    __HAL_RCC_GPIOA_CLK_ENABLE();			//å¼€å¯GPIOAæ—¶é’Ÿ
+
+    GPIO_Initure.Pin = GPIO_PIN_5;        //PA5
+    GPIO_Initure.Mode = GPIO_MODE_ANALOG; //æ¨¡æ‹Ÿ
+    GPIO_Initure.Pull = GPIO_NOPULL;      //ä¸å¸¦ä¸Šä¸‹æ‹‰
+    HAL_GPIO_Init(GPIOA, &GPIO_Initure);
 }
 
-//»ñµÃADCÖµ
-//ch: Í¨µÀÖµ 0~16£¬È¡Öµ·¶Î§Îª£ºADC_CHANNEL_0~ADC_CHANNEL_16
-//·µ»ØÖµ:×ª»»½á¹û
-u16 Get_Adc(u32 ch)   
+//è·å¾—ADCå€¼
+//ch: é€šé“å€¼ 0~16ï¼Œå–å€¼èŒƒå›´ä¸ºï¼šADC_CHANNEL_0~ADC_CHANNEL_16
+//è¿”å›å€¼:è½¬æ¢ç»“æœ
+u16 Get_Adc(u32 ch)
 {
     ADC_ChannelConfTypeDef ADC1_ChanConf;
-    
-    ADC1_ChanConf.Channel=ch;                                   //Í¨µÀ
-    ADC1_ChanConf.Rank=1;                                       //µÚ1¸öĞòÁĞ£¬ĞòÁĞ1
-    ADC1_ChanConf.SamplingTime=ADC_SAMPLETIME_480CYCLES;        //²ÉÑùÊ±¼ä
-    ADC1_ChanConf.Offset=0;                 
-    HAL_ADC_ConfigChannel(&ADC1_Handler,&ADC1_ChanConf);        //Í¨µÀÅäÖÃ
-	
-    HAL_ADC_Start(&ADC1_Handler);                               //¿ªÆôADC
-	
-    HAL_ADC_PollForConversion(&ADC1_Handler,10);                //ÂÖÑ¯×ª»»
- 
-	return (u16)HAL_ADC_GetValue(&ADC1_Handler);	        //·µ»Ø×î½üÒ»´ÎADC1¹æÔò×éµÄ×ª»»½á¹û
+
+    ADC1_ChanConf.Channel = ch;                            //é€šé“
+    ADC1_ChanConf.Rank = 1;                                //ç¬¬1ä¸ªåºåˆ—ï¼Œåºåˆ—1
+    ADC1_ChanConf.SamplingTime = ADC_SAMPLETIME_480CYCLES; //é‡‡æ ·æ—¶é—´
+    ADC1_ChanConf.Offset = 0;
+    HAL_ADC_ConfigChannel(&ADC1_Handler, &ADC1_ChanConf); //é€šé“é…ç½®
+
+    HAL_ADC_Start(&ADC1_Handler); //å¼€å¯ADC
+
+    HAL_ADC_PollForConversion(&ADC1_Handler, 10); //è½®è¯¢è½¬æ¢
+
+    return (u16)HAL_ADC_GetValue(&ADC1_Handler); //è¿”å›æœ€è¿‘ä¸€æ¬¡ADC1è§„åˆ™ç»„çš„è½¬æ¢ç»“æœ
 }
-//»ñÈ¡Ö¸¶¨Í¨µÀµÄ×ª»»Öµ£¬È¡times´Î,È»ºóÆ½¾ù 
-//times:»ñÈ¡´ÎÊı
-//·µ»ØÖµ:Í¨µÀchµÄtimes´Î×ª»»½á¹ûÆ½¾ùÖµ
-u16 Get_Adc_Average(u32 ch,u8 times)
+//è·å–æŒ‡å®šé€šé“çš„è½¬æ¢å€¼ï¼Œå–timesæ¬¡,ç„¶åå¹³å‡
+//times:è·å–æ¬¡æ•°
+//è¿”å›å€¼:é€šé“chçš„timesæ¬¡è½¬æ¢ç»“æœå¹³å‡å€¼
+u16 Get_Adc_Average(u32 ch, u8 times)
 {
-	u32 temp_val=0;
-	u8 t;
-	for(t=0;t<times;t++)
-	{
-		temp_val+=Get_Adc(ch);
-		delay_ms(5);
-	}
-	return temp_val/times;
-} 
+    u32 temp_val = 0;
+    u8 t;
+    for (t = 0; t < times; t++)
+    {
+        temp_val += Get_Adc(ch);
+        delay_ms(5);
+    }
+    return temp_val / times;
+}

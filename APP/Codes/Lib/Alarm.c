@@ -1,4 +1,4 @@
-#include "OSIF.h"
+#include "Os.h"
 #include "Alarm.h"
 #include "AlarmCfg.h"
 // ALARM 管理提供给外部的公共调用函数
@@ -6,9 +6,7 @@
  
 #if CONFIG_ALARM_NUMBER > 0
 // ALARM 控制块表声明
-extern TMR AlarmTable[CONFIG_ALARM_NUMBER];
-extern const bool AlarmAutoStartFlag[CONFIG_ALARM_NUMBER];
-#endif
+extern const AlarmAutoStartParam_t AlarmAutoStartCfg[CONFIG_ALARM_NUMBER];
 
 /**
  * @brief
@@ -28,42 +26,33 @@ StatusType SetAlarm(AlarmType almId, TickType increment, TickType cycle)
     
     if(almId >= CONFIG_ALARM_NUMBER)
     {
-        OS_HOOK_ErrorHook(E_OS_VALUE,OSServiceId_SetRelAlarm, almId);
+        OS_HOOK_ErrorHook(E_OS_VALUE, OSServiceId_SetRelAlarm, almId);
         RetVal = 1;
     }
     else
     {
-        // 如果起始时间值大于counter配置的最大值，返回E_OS_VALUE
-        if( increment > MAX_ALLOWED_TICK_VALUE)
+        // 对于周期性ALARM，如果周期值大于counter配置的最大值或低于最小周期值，返回E_OS_VALUE
+        if(( cycle != 0 ) && (cycle < MIN_ALLOWED_CYCLE_TICK_VALUE))
         {
             OS_HOOK_ErrorHook(E_OS_VALUE, OSServiceId_SetRelAlarm, almId);
-            RetVal = 2;
+            RetVal = 3;
         }
         else
         {
-            // 对于周期性ALARM，如果周期值大于counter配置的最大值或低于最小周期值，返回E_OS_VALUE
-            if(( cycle != 0 ) && ( (cycle > MAX_ALLOWED_TICK_VALUE) || (cycle < MIN_ALLOWED_CYCLE_TICK_VALUE)))
+            // 如果指定ALARM已经在用，返回E_OS_STATE
+            if(AlarmTable[almId].pRAMData->State != (AlarmType)0 )
             {
-                OS_HOOK_ErrorHook(E_OS_VALUE, OSServiceId_SetRelAlarm, almId);
-                RetVal = 3;
+                OS_HOOK_ErrorHook(E_OS_STATE, OSServiceId_SetRelAlarm, almId);
+                RetVal = 4;
             }
             else
             {
-                // 如果指定ALARM已经在用，返回E_OS_STATE
-                if(AlarmTable[almId].pRAMData->State != (AlarmType)0 )
-                {
-                    OS_HOOK_ErrorHook(E_OS_STATE, OSServiceId_SetRelAlarm, almId);
-                    RetVal = 4;
-                }
-                else
-                {
-                    // 屏蔽中断
-                    DisableOSInt();
-                    // 调用SetAlarm设置ALARM
-                    TmgrStartTimer(&AlarmTable[almId], increment, cycle);
-                    // 打开中断
-                    EnableOSInt();
-                }
+                // 屏蔽中断
+                DisableOSInt();
+                // 调用SetAlarm设置ALARM
+                TmgrStartTimer(&AlarmTable[almId], increment, cycle);
+                // 打开中断
+                EnableOSInt();
             }
         }
     }
@@ -104,17 +93,95 @@ void Alarm_Counter(TickType SystickCounter)
     TmgrHandleTickCounter(SystickCounter);
 }
 
+FUNC(StatusType, OS_CODE) GetCounterValue (
+                                            VAR(CounterType, AUTOMATIC) CounterID,
+                                            VAR(TickRefType, AUTOMATIC) Value)
+{
+  VAR(StatusType, AUTOMATIC)  ev;
+
+
+    /* [SWS_Os_00381] If the input parameter <CounterID> in a call of
+    GetElapsedValue() is not valid GetElapsedValue() shall return E_OS_ID. */
+    if (CounterID >= OS_COUNTER_COUNT) 
+    {
+        ev = E_ID;
+    } 
+    else if (Value == NULL) 
+    {
+        ev = E_PARAM_POINTER;
+    } 
+    else
+    {
+        CONST(TickType, AUTOMATIC) local_curr_value = Os_GetMilliseconds();
+
+        (*Value) = local_curr_value;
+        ev = E_OK;
+    }
+    return ev;
+}
+
+FUNC(StatusType, OS_CODE) GetElapsedValue (
+                                            VAR(CounterType, AUTOMATIC) CounterID,
+                                            VAR(TickRefType, AUTOMATIC) Value,
+                                            VAR(TickRefType, AUTOMATIC) ElapsedValue)
+{
+  VAR(StatusType, AUTOMATIC)  ev;
+
+
+    /* [SWS_Os_00381] If the input parameter <CounterID> in a call of
+    GetElapsedValue() is not valid GetElapsedValue() shall return E_OS_ID. */
+    if (CounterID >= OS_COUNTER_COUNT) 
+    {
+        ev = E_ID;
+    } 
+    else if ((Value == NULL) || (ElapsedValue == NULL)) 
+    {
+        ev = E_PARAM_POINTER;
+    } 
+    else
+    {
+        CONST(TickType, AUTOMATIC) local_value = (*Value);
+
+        /* [SWS_Os_00382] If the input parameters in a call of GetElapsedValue()
+            are valid, GetElapsedValue() shall return the number of elapsed ticks
+            since the given <Value> value via <ElapsedValue> and shall return
+            E_OK. (SRS_Frt_00034) */
+        CONST(TickType, AUTOMATIC) local_curr_value = Os_GetMilliseconds();
+
+/* [SWS_Os_00533] Caveats of GetElapsedValue(): If the timer already passed the
+    <Value> value a second (or multiple) time, the result returned is wrong.
+    The reason is that the service can not detect such a relative overflow. */
+/* EG  TODO: Add support for HARDWARE counters */
+      (*ElapsedValue) = (local_curr_value >= local_value)?
+        /* Timer did not pass the <value> yet */
+        (local_curr_value - local_value):
+        /* Timer already passed the <value> */
+        ((OsCounterMaxAllowedValue - (local_value - local_curr_value)) + 1U);
+
+    /* [SWS_Os_00460] GetElapsedValue() shall return the current tick value of the
+        counter in the <Value> parameter. */
+        (*Value) = local_curr_value;
+
+        ev = E_OK;
+    }
+    return ev;
+}
+
 // 内部函数
 void Alarm_Init(void)
 {
-#undef _TSK_CFG_
-#undef ALARMDEF
-#define ALARMDEF(AlarmName, Flag, Cyctim, Cycphs, ActiveMethod)  \
-    if(Flag == true)                               \
-    {                                              \
-        SetAlarm(ALARM_ID_##AlarmName, Cyctim, Cycphs);\
+    uint8_t AlarmIndex;
+
+
+    for(AlarmIndex = 0; AlarmIndex < CONFIG_ALARM_NUMBER; AlarmIndex++)
+    {
+        if(AlarmAutoStartCfg[AlarmIndex].AutoStartFlag == true)
+        {
+            SetAlarm(AlarmAutoStartCfg[AlarmIndex].Alarm_Id, 
+                     AlarmAutoStartCfg[AlarmIndex].DiffTimeOutVal, 
+                     AlarmAutoStartCfg[AlarmIndex].CycleTimeOutVal);
+        }
     }
-#include "tsk.cfg"
-#undef ALARMDEF
 }
  
+#endif

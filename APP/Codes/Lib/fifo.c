@@ -19,17 +19,16 @@
 ******************************************************************/
 
 /* Includes ------------------------------------------------------------------*/
-#include  <stdlib.h>
+#include <stdlib.h>
 #include "fifo.h"
 #include <string.h>
 
-
 #if 0
-#pragma inline  (fifo_GetLen)
-#pragma inline  (fifo_GetFreeSpace)
-#pragma inline  (fifo_insert)
-#pragma inline  (fifo_retrieve)
-#pragma inline  (Fifo_strchr)
+#pragma inline(fifo_GetLen)
+#pragma inline(fifo_GetFreeSpace)
+#pragma inline(fifo_insert)
+#pragma inline(fifo_retrieve)
+#pragma inline(Fifo_strchr)
 #endif
 
 /************************************************************************
@@ -46,13 +45,13 @@
 u8 fifo_Init(fifo_TypeDef *_fifo, u8 *data, u32 size)
 {
     /* check for a valid pointer */
-    if(_fifo == NULL)
+    if (_fifo == NULL)
     {
         return ERROR;
     }
 
     /* if fifo size is null nothing to do */
-    if(size == 0)
+    if (size == 0)
     {
         memset((u8 *)_fifo, 0x00, sizeof(fifo_TypeDef));
         return ERROR;
@@ -62,7 +61,7 @@ u8 fifo_Init(fifo_TypeDef *_fifo, u8 *data, u32 size)
         /* allocate fifo space. */
         _fifo->baseAddr = data;
 
-        if(_fifo->baseAddr == NULL)
+        if (_fifo->baseAddr == NULL)
         {
             /* memory allocation failure. */
 #ifdef SZ_LOG
@@ -84,7 +83,6 @@ u8 fifo_Init(fifo_TypeDef *_fifo, u8 *data, u32 size)
     }
 }
 
-
 /************************************************************************
     Function :
     Description : DeInit the fifo structure.
@@ -98,13 +96,13 @@ u8 fifo_DeInit(fifo_TypeDef *_fifo)
 {
     u8 status = ERROR;
 
-    if(_fifo == NULL)
+    if (_fifo == NULL)
     {
         status = ERROR;
     }
     else
     {
-        if(_fifo->baseAddr != NULL)
+        if (_fifo->baseAddr != NULL)
         {
             /* optional (clear memory region) */
             memset((u8 *)_fifo->baseAddr, 0x00, _fifo->size);
@@ -121,7 +119,6 @@ u8 fifo_DeInit(fifo_TypeDef *_fifo)
     return status;
 }
 
-
 /************************************************************************
     Function :
     Description : Reset the fifo structure.
@@ -133,13 +130,13 @@ u8 fifo_DeInit(fifo_TypeDef *_fifo)
 ************************************************************************/
 u8 fifo_Reset(fifo_TypeDef *_fifo)
 {
-    if(_fifo == NULL)
+    if (_fifo == NULL)
     {
         return ERROR;
     }
     else
     {
-        if(_fifo->baseAddr != NULL)
+        if (_fifo->baseAddr != NULL)
         {
             /* optional (clear memory region) */
             //memset((u8 *)_fifo->baseAddr, 0x00, _fifo->size);
@@ -156,8 +153,6 @@ u8 fifo_Reset(fifo_TypeDef *_fifo)
     }
 }
 
-
-
 /************************************************************************
     Function :
     Description : returns how much data is stored in the fifo.
@@ -169,7 +164,7 @@ u8 fifo_Reset(fifo_TypeDef *_fifo)
 ************************************************************************/
 u32 fifo_GetLen(fifo_TypeDef *_fifo)
 {
-    if(_fifo == NULL)
+    if (_fifo == NULL)
     {
         return 0;
     }
@@ -178,7 +173,6 @@ u32 fifo_GetLen(fifo_TypeDef *_fifo)
         return (_fifo->tail - _fifo->head);
     }
 }
-
 
 /************************************************************************
     Function :
@@ -191,7 +185,7 @@ u32 fifo_GetLen(fifo_TypeDef *_fifo)
 ************************************************************************/
 u32 fifo_GetFreeSpace(fifo_TypeDef *_fifo)
 {
-    if(_fifo == NULL)
+    if (_fifo == NULL)
     {
         return 0;
     }
@@ -200,8 +194,6 @@ u32 fifo_GetFreeSpace(fifo_TypeDef *_fifo)
         return (_fifo->size - (_fifo->tail - _fifo->head));
     }
 }
-
-
 
 /************************************************************************
     Function :
@@ -214,7 +206,7 @@ u32 fifo_GetFreeSpace(fifo_TypeDef *_fifo)
 ************************************************************************/
 FlagStatus fifo_NotFull(fifo_TypeDef *_fifo)
 {
-    if(_fifo == NULL)
+    if (_fifo == NULL)
     {
         return RESET;
     }
@@ -223,7 +215,6 @@ FlagStatus fifo_NotFull(fifo_TypeDef *_fifo)
         return ((_fifo->tail - _fifo->head) != _fifo->size) ? SET : RESET;
     }
 }
-
 
 /************************************************************************
     Function :
@@ -242,16 +233,15 @@ u32 fifo_insert(fifo_TypeDef *_fifo, u8 *data, u32 len)
     u32 offset;
     u32 end;
 
-
-    offset   = _fifo->size - (_fifo->tail - _fifo->head);
+    offset = _fifo->size - (_fifo->tail - _fifo->head);
     /*Actual size of data we can write*/
     real_len = MIN_VAL(len, offset);
     /*Offset of write pointer*/
-    offset   = _fifo->tail % _fifo->size;
+    offset = _fifo->tail % _fifo->size;
     /*End position before buffer being warpped*/
-    end      = MIN_VAL(real_len,  _fifo->size - offset);
+    end = MIN_VAL(real_len, _fifo->size - offset);
 
-    /*Copy data to buffer before warp 在变形之前将数据复制到缓冲区*/
+    /*Copy data to buffer before warp */
     memcpy(_fifo->baseAddr + offset, data, end);
 
     /*Copy data to buffer after warp*/
@@ -261,7 +251,6 @@ u32 fifo_insert(fifo_TypeDef *_fifo, u8 *data, u32 len)
 
     return real_len;
 }
-
 
 /************************************************************************
     Function :
@@ -280,8 +269,8 @@ u32 fifo_retrieve(fifo_TypeDef *_fifo, u8 *data, u32 len)
     u32 offset;
     u32 end;
 
-	/*获取在中断中插入fifo中数据的真实长度*/
-    offset   = _fifo->tail - _fifo->head;
+    /*获取插入fifo中数据的真实长度*/
+    offset = _fifo->tail - _fifo->head;
     real_len = MIN_VAL(len, offset);
 
     //得到偏移量
@@ -305,23 +294,21 @@ u32 fifo_retrieve(fifo_TypeDef *_fifo, u8 *data, u32 len)
 * 输入参数: data-帧尾结束符
 * 返回数据: fifo中接收到的数据到字节data第一次出现的长度
 *****************************************************************************/
-u32  Fifo_strchr(fifo_TypeDef *_fifo, u8 data)
+u32 Fifo_strchr(fifo_TypeDef *_fifo, u8 data)
 {
     u32 remaining = 0;
-    u32 len       = 0;
+    u32 len = 0;
     u32 head;
 
-
-    head      = _fifo->head;
+    head = _fifo->head;
     remaining = _fifo->tail - head;
-    head      = head % _fifo->size;
+    head = head % _fifo->size;
 
-
-    while(remaining)
+    while (remaining)
     {
         len++;
 
-        if(data == *((_fifo->baseAddr + head)))
+        if (data == *((_fifo->baseAddr + head)))
         {
             return len;
         }
@@ -333,4 +320,3 @@ u32  Fifo_strchr(fifo_TypeDef *_fifo, u8 data)
 
     return 0;
 }
-

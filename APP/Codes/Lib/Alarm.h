@@ -1,6 +1,10 @@
 #ifndef _ALARM_H_
 #define _ALARM_H_
 
+#ifndef STATUSTYPE_DEFINED
+#define STATUSTYPE_DEFINED
+typedef unsigned char      StatusType;
+#endif
 
 /**
  * $Log: Alarm.h,v $
@@ -37,20 +41,17 @@ extern "C" {
 #endif
 
 #if 1
-typedef u8      AlarmType;
-typedef u32     TickType;
-typedef TMR*    AlarmBaseRefType;
-typedef u32*    TickRefType;
-
+typedef uint8_t      AlarmType;
+typedef uint32_t     TickType;
+typedef TMR     *    AlarmBaseRefType;
+typedef uint32_t   * TickRefType;
+typedef uint32_t     CounterType;
 
 #define MAX_ALLOWED_TICK_VALUE            (0xffffffff)
 #define MIN_ALLOWED_CYCLE_TICK_VALUE      (0x0001)
 
 #define OSServiceId_SetRelAlarm    0x04
 #define OSServiceId_CancelAlarm    0x05
-
-#define E_OS_VALUE                 0x01
-#define E_OS_STATE                 0x02
 
 
 #define ALARMCALLBACK(AlarmName)   void Alarm_##AlarmName##_CallBack(void)
@@ -86,7 +87,15 @@ StatusType CancelAlarm( AlarmType almId );
 void Alarm_Counter(TickType SystickCounter);
 
 void Alarm_Init( void );
- 
+
+FUNC(StatusType, OS_CODE) GetCounterValue (
+                                            VAR(CounterType, AUTOMATIC) CounterID,
+                                            VAR(TickRefType, AUTOMATIC) Value);
+
+FUNC(StatusType, OS_CODE) GetElapsedValue (
+                                            VAR(CounterType, AUTOMATIC) CounterID,
+                                            VAR(TickRefType, AUTOMATIC) Value,
+                                            VAR(TickRefType, AUTOMATIC) ElapsedValue);
  
 #if CONFIG_ALARM_NUMBER > 0
 extern TMR AlarmTable[CONFIG_ALARM_NUMBER];
@@ -96,10 +105,6 @@ extern TMR AlarmTable[CONFIG_ALARM_NUMBER];
 #define DeclareAlarm(alarm)
 
 #endif
-
-#define DisableTmrInterrupt(void)
-#define EnableTmrInterrupt(void)
-
 
 #ifdef __cplusplus
 }

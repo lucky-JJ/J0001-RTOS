@@ -1,38 +1,38 @@
 #ifndef _SDRAM_H
 #define _SDRAM_H
 #include "sys.h"
-//////////////////////////////////////////////////////////////////////////////////	 
-//±¾³ÌĞòÖ»¹©Ñ§Ï°Ê¹ÓÃ£¬Î´¾­×÷ÕßĞí¿É£¬²»µÃÓÃÓÚÆäËüÈÎºÎÓÃÍ¾
-//ALIENTEK STM32F429¿ª·¢°å
-//SDRAMÇı¶¯´úÂë	   
-//ÕıµãÔ­×Ó@ALIENTEK
-//¼¼ÊõÂÛÌ³:www.openedv.com
-//´´½¨ÈÕÆÚ:2016/1/6
-//°æ±¾£ºV1.0
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ¹ãÖİÊĞĞÇÒíµç×Ó¿Æ¼¼ÓĞÏŞ¹«Ë¾ 2014-2024
-//All rights reserved									  
-////////////////////////////////////////////////////////////////////////////////// 	
-extern SDRAM_HandleTypeDef SDRAM_Handler;//SDRAM¾ä±ú
-#define Bank5_SDRAM_ADDR    ((u32)(0XC0000000)) //SDRAM¿ªÊ¼µØÖ·
+//////////////////////////////////////////////////////////////////////////////////
+//æœ¬ç¨‹åºåªä¾›å­¦ä¹ ä½¿ç”¨ï¼Œæœªç»ä½œè€…è®¸å¯ï¼Œä¸å¾—ç”¨äºå…¶å®ƒä»»ä½•ç”¨é€”
+//ALIENTEK STM32F429å¼€å‘æ¿
+//SDRAMé©±åŠ¨ä»£ç 
+//æ­£ç‚¹åŸå­@ALIENTEK
+//æŠ€æœ¯è®ºå›:www.openedv.com
+//åˆ›å»ºæ—¥æœŸ:2016/1/6
+//ç‰ˆæœ¬ï¼šV1.0
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) å¹¿å·å¸‚æ˜Ÿç¿¼ç”µå­ç§‘æŠ€æœ‰é™å…¬å¸ 2014-2024
+//All rights reserved
+//////////////////////////////////////////////////////////////////////////////////
+extern SDRAM_HandleTypeDef SDRAM_Handler;    //SDRAMå¥æŸ„
+#define Bank5_SDRAM_ADDR ((u32)(0XC0000000)) //SDRAMå¼€å§‹åœ°å€
 
-//SDRAMÅäÖÃ²ÎÊı
-#define SDRAM_MODEREG_BURST_LENGTH_1             ((u16)0x0000)
-#define SDRAM_MODEREG_BURST_LENGTH_2             ((u16)0x0001)
-#define SDRAM_MODEREG_BURST_LENGTH_4             ((u16)0x0002)
-#define SDRAM_MODEREG_BURST_LENGTH_8             ((u16)0x0004)
-#define SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL      ((u16)0x0000)
-#define SDRAM_MODEREG_BURST_TYPE_INTERLEAVED     ((u16)0x0008)
-#define SDRAM_MODEREG_CAS_LATENCY_2              ((u16)0x0020)
-#define SDRAM_MODEREG_CAS_LATENCY_3              ((u16)0x0030)
-#define SDRAM_MODEREG_OPERATING_MODE_STANDARD    ((u16)0x0000)
+//SDRAMé…ç½®å‚æ•°
+#define SDRAM_MODEREG_BURST_LENGTH_1 ((u16)0x0000)
+#define SDRAM_MODEREG_BURST_LENGTH_2 ((u16)0x0001)
+#define SDRAM_MODEREG_BURST_LENGTH_4 ((u16)0x0002)
+#define SDRAM_MODEREG_BURST_LENGTH_8 ((u16)0x0004)
+#define SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL ((u16)0x0000)
+#define SDRAM_MODEREG_BURST_TYPE_INTERLEAVED ((u16)0x0008)
+#define SDRAM_MODEREG_CAS_LATENCY_2 ((u16)0x0020)
+#define SDRAM_MODEREG_CAS_LATENCY_3 ((u16)0x0030)
+#define SDRAM_MODEREG_OPERATING_MODE_STANDARD ((u16)0x0000)
 #define SDRAM_MODEREG_WRITEBURST_MODE_PROGRAMMED ((u16)0x0000)
-#define SDRAM_MODEREG_WRITEBURST_MODE_SINGLE     ((u16)0x0200)
+#define SDRAM_MODEREG_WRITEBURST_MODE_SINGLE ((u16)0x0200)
 
 void SDRAM_Init(void);
 void SDRAM_MPU_Config(void);
-u8 SDRAM_Send_Cmd(u8 bankx,u8 cmd,u8 refresh,u16 regval);
-void FMC_SDRAM_WriteBuffer(u8 *pBuffer,u32 WriteAddr,u32 n);
-void FMC_SDRAM_ReadBuffer(u8 *pBuffer,u32 ReadAddr,u32 n);
+u8 SDRAM_Send_Cmd(u8 bankx, u8 cmd, u8 refresh, u16 regval);
+void FMC_SDRAM_WriteBuffer(u8 *pBuffer, u32 WriteAddr, u32 n);
+void FMC_SDRAM_ReadBuffer(u8 *pBuffer, u32 ReadAddr, u32 n);
 void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram);
 #endif

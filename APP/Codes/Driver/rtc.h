@@ -1,24 +1,24 @@
 #ifndef __RTC_H
 #define __RTC_H
 #include "sys.h"
-//////////////////////////////////////////////////////////////////////////////////	 
-//±¾³ÌĞòÖ»¹©Ñ§Ï°Ê¹ÓÃ£¬Î´¾­×÷ÕßĞí¿É£¬²»µÃÓÃÓÚÆäËüÈÎºÎÓÃÍ¾
-//ALIENTEK STM32F429¿ª·¢°å
-//RTCÇı¶¯´úÂë	   
-//ÕıµãÔ­×Ó@ALIENTEK
-//¼¼ÊõÂÛÌ³:www.openedv.com
-//´´½¨ÈÕÆÚ:2016/1/13 
-//°æ±¾£ºV1.0
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ¹ãÖİÊĞĞÇÒíµç×Ó¿Æ¼¼ÓĞÏŞ¹«Ë¾ 2014-2024
-//All rights reserved									  
-////////////////////////////////////////////////////////////////////////////////// 	
+//////////////////////////////////////////////////////////////////////////////////
+//æœ¬ç¨‹åºåªä¾›å­¦ä¹ ä½¿ç”¨ï¼Œæœªç»ä½œè€…è®¸å¯ï¼Œä¸å¾—ç”¨äºå…¶å®ƒä»»ä½•ç”¨é€”
+//ALIENTEK STM32F429å¼€å‘æ¿
+//RTCé©±åŠ¨ä»£ç 
+//æ­£ç‚¹åŸå­@ALIENTEK
+//æŠ€æœ¯è®ºå›:www.openedv.com
+//åˆ›å»ºæ—¥æœŸ:2016/1/13
+//ç‰ˆæœ¬ï¼šV1.0
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) å¹¿å·å¸‚æ˜Ÿç¿¼ç”µå­ç§‘æŠ€æœ‰é™å…¬å¸ 2014-2024
+//All rights reserved
+//////////////////////////////////////////////////////////////////////////////////
 
-extern RTC_HandleTypeDef RTC_Handler;  //RTC¾ä±ú
-    
-u8 RTC_Init(void);              //RTC³õÊ¼»¯
-HAL_StatusTypeDef RTC_Set_Time(u8 hour,u8 min,u8 sec,u8 ampm);      //RTCÊ±¼äÉèÖÃ
-HAL_StatusTypeDef RTC_Set_Date(u8 year,u8 month,u8 date,u8 week);	//RTCÈÕÆÚÉèÖÃ
-void RTC_Set_AlarmA(u8 week,u8 hour,u8 min,u8 sec); //ÉèÖÃÄÖÖÓÊ±¼ä(°´ĞÇÆÚÄÖÁå,24Ğ¡Ê±ÖÆ)
-void RTC_Set_WakeUp(u32 wksel,u16 cnt);             //ÖÜÆÚĞÔ»½ĞÑ¶¨Ê±Æ÷ÉèÖÃ
+extern RTC_HandleTypeDef RTC_Handler; //RTCå¥æŸ„
+
+u8 RTC_Init(void);                                                   //RTCåˆå§‹åŒ–
+HAL_StatusTypeDef RTC_Set_Time(u8 hour, u8 min, u8 sec, u8 ampm);    //RTCæ—¶é—´è®¾ç½®
+HAL_StatusTypeDef RTC_Set_Date(u8 year, u8 month, u8 date, u8 week); //RTCæ—¥æœŸè®¾ç½®
+void RTC_Set_AlarmA(u8 week, u8 hour, u8 min, u8 sec);               //è®¾ç½®é—¹é’Ÿæ—¶é—´(æŒ‰æ˜ŸæœŸé—¹é“ƒ,24å°æ—¶åˆ¶)
+void RTC_Set_WakeUp(u32 wksel, u16 cnt);                             //å‘¨æœŸæ€§å”¤é†’å®šæ—¶å™¨è®¾ç½®
 #endif

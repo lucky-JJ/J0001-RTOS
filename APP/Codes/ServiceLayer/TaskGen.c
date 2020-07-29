@@ -6,23 +6,22 @@
 //#include "AlarmCfg.h"
 #include "osif_freertos.h"
 
-TaskHandle_t TaskTcbTbl[FREERTOS_MAX_TASK_NUM];
-QueueHandle_t TaskDataQueueTbl[FREERTOS_MAX_TASK_NUM];
-QueueHandle_t TaskMailBoxTbl[FREERTOS_MAX_TASK_NUM];
-SemaphoreHandle_t SemphrTbl[FREERTOS_MAX_SEM_AND_MTX_NUM];
-
+TaskHandle_t TaskTcbTbl[TID_Max];
+QueueHandle_t TaskDataQueueTbl[TID_Max];
+QueueHandle_t TaskMailBoxTbl[TID_Max];
+SemaphoreHandle_t SemphrTbl[TID_Max];
 
 /*声明在osal.c中定义的osName##_Task*/
-# undef _TSK_CFG_
-# undef STDTASKDEF
-# define STDTASKDEF(osName, Prio, StackDepth)  \
-extern void osName##_Task(void *pvParameters);
-# include "tsk.h"
-# undef STDTASKDEF
+#undef _TSK_CFG_
+#undef STDTASKDEF
+#define STDTASKDEF(osName, Prio, StackDepth) \
+    extern void osName##_Task(void *pvParameters);
+#include "tsk.h"
+#undef STDTASKDEF
 
 void SysTicCycleHanldeHook(int Tick)
 {
-//    Alarm_Counter(2);
+    //    Alarm_Counter(2);
 }
 
 //创建任务
@@ -45,21 +44,18 @@ int TasksCreateStatic(void)
 		}
     */
 
-# undef _TSK_CFG_
-# undef STDTASKDEF
-# define STDTASKDEF(osName, Prio, StackDepth)  \
-	xTaskCreate(osName##_Task, "osName", StackDepth, NULL, Prio, &xHandle);\
-	TaskIDCnt++;\
+#undef _TSK_CFG_
+#undef STDTASKDEF
+#define STDTASKDEF(osName, Prio, StackDepth)                                \
+    xTaskCreate(osName##_Task, "osName", StackDepth, NULL, Prio, &xHandle); \
+    TaskIDCnt++;                                                            \
     TaskTcbTbl[TaskIDCnt] = xHandle;
 
-# include "tsk.h"
-# undef STDTASKDEF
-
-
-	
+#include "tsk.h"
+#undef STDTASKDEF
 
     xTaskCreate(Uart1_Task, "Uart1", 200, NULL, 1, &xHandle);
-    if(xHandle != NULL)
+    if (xHandle != NULL)
     {
         TaskIDCnt++;
         TaskTcbTbl[TaskIDCnt] = xHandle;
@@ -69,9 +65,8 @@ int TasksCreateStatic(void)
         return 1;
     }
 
-	
     xTaskCreate(Key_Task, "Key", 50, NULL, 2, &xHandle);
-    if(xHandle != NULL)
+    if (xHandle != NULL)
     {
         TaskIDCnt++;
         TaskTcbTbl[TaskIDCnt] = xHandle;
@@ -82,7 +77,7 @@ int TasksCreateStatic(void)
     }
 
     xTaskCreate(Led_Task, "Led", 50, NULL, 3, &xHandle);
-    if(xHandle != NULL)
+    if (xHandle != NULL)
     {
         TaskIDCnt++;
         TaskTcbTbl[TaskIDCnt] = xHandle;
@@ -91,9 +86,6 @@ int TasksCreateStatic(void)
     {
         return 1;
     }
-
-
-
 
     return 0;
 }
@@ -104,9 +96,8 @@ int DataQueueCreateStatic(void)
     QueueHandle_t xQueue = NULL;
     u8 DataQueueCnt = 0;
 
-
     xQueue = xQueueCreate(180, sizeof(u32));
-    if(xQueue != NULL)
+    if (xQueue != NULL)
     {
         DataQueueCnt++;
         TaskDataQueueTbl[DataQueueCnt] = xQueue;
@@ -122,15 +113,18 @@ int DataQueueCreateStatic(void)
     return 0;
 }
 
-//信号量
+/**
+ * @description:创建静态信号量
+ * @param {type} 
+ * @return: 
+ */
 int SemphrCreateStatic(void)
 {
     SemaphoreHandle_t xSemaphore = NULL;
     u8 SemIDCnt = 0;
 
-
     xSemaphore = xSemaphoreCreateCounting(1, 0);
-    if(xSemaphore != NULL)
+    if (xSemaphore != NULL)
     {
         SemIDCnt++;
         SemphrTbl[SemIDCnt] = xSemaphore;
@@ -140,7 +134,7 @@ int SemphrCreateStatic(void)
         return 1;
     }
     xSemaphore = xSemaphoreCreateMutex();
-    if(xSemaphore != NULL)
+    if (xSemaphore != NULL)
     {
         SemIDCnt++;
         SemphrTbl[SemIDCnt] = xSemaphore;

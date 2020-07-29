@@ -48,7 +48,7 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */ 
+  */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
@@ -70,30 +70,27 @@
 /**
   * @brief STM32F4xx HAL Driver version number V1.4.2
   */
-#define __STM32F4xx_HAL_VERSION_MAIN   (0x01) /*!< [31:24] main version */
-#define __STM32F4xx_HAL_VERSION_SUB1   (0x04) /*!< [23:16] sub1 version */
-#define __STM32F4xx_HAL_VERSION_SUB2   (0x02) /*!< [15:8]  sub2 version */
-#define __STM32F4xx_HAL_VERSION_RC     (0x00) /*!< [7:0]  release candidate */ 
-#define __STM32F4xx_HAL_VERSION         ((__STM32F4xx_HAL_VERSION_MAIN << 24)\
-                                        |(__STM32F4xx_HAL_VERSION_SUB1 << 16)\
-                                        |(__STM32F4xx_HAL_VERSION_SUB2 << 8 )\
-                                        |(__STM32F4xx_HAL_VERSION_RC))
-                                        
-#define IDCODE_DEVID_MASK    ((uint32_t)0x00000FFF)
+#define __STM32F4xx_HAL_VERSION_MAIN (0x01) /*!< [31:24] main version */
+#define __STM32F4xx_HAL_VERSION_SUB1 (0x04) /*!< [23:16] sub1 version */
+#define __STM32F4xx_HAL_VERSION_SUB2 (0x02) /*!< [15:8]  sub2 version */
+#define __STM32F4xx_HAL_VERSION_RC (0x00)   /*!< [7:0]  release candidate */
+#define __STM32F4xx_HAL_VERSION ((__STM32F4xx_HAL_VERSION_MAIN << 24) | (__STM32F4xx_HAL_VERSION_SUB1 << 16) | (__STM32F4xx_HAL_VERSION_SUB2 << 8) | (__STM32F4xx_HAL_VERSION_RC))
+
+#define IDCODE_DEVID_MASK ((uint32_t)0x00000FFF)
 
 /* ------------ RCC registers bit address in the alias region ----------- */
-#define SYSCFG_OFFSET             (SYSCFG_BASE - PERIPH_BASE)
-/* ---  MEMRMP Register ---*/ 
-/* Alias word address of UFB_MODE bit */ 
-#define MEMRMP_OFFSET             SYSCFG_OFFSET 
-#define UFB_MODE_BIT_NUMBER       POSITION_VAL(SYSCFG_MEMRMP_UFB_MODE)
-#define UFB_MODE_BB               (uint32_t)(PERIPH_BB_BASE + (MEMRMP_OFFSET * 32) + (UFB_MODE_BIT_NUMBER * 4)) 
+#define SYSCFG_OFFSET (SYSCFG_BASE - PERIPH_BASE)
+/* ---  MEMRMP Register ---*/
+/* Alias word address of UFB_MODE bit */
+#define MEMRMP_OFFSET SYSCFG_OFFSET
+#define UFB_MODE_BIT_NUMBER POSITION_VAL(SYSCFG_MEMRMP_UFB_MODE)
+#define UFB_MODE_BB (uint32_t)(PERIPH_BB_BASE + (MEMRMP_OFFSET * 32) + (UFB_MODE_BIT_NUMBER * 4))
 
-/* ---  CMPCR Register ---*/ 
-/* Alias word address of CMP_PD bit */ 
-#define CMPCR_OFFSET              (SYSCFG_OFFSET + 0x20) 
-#define CMP_PD_BIT_NUMBER         POSITION_VAL(SYSCFG_CMPCR_CMP_PD)
-#define CMPCR_CMP_PD_BB           (uint32_t)(PERIPH_BB_BASE + (CMPCR_OFFSET * 32) + (CMP_PD_BIT_NUMBER * 4))
+/* ---  CMPCR Register ---*/
+/* Alias word address of CMP_PD bit */
+#define CMPCR_OFFSET (SYSCFG_OFFSET + 0x20)
+#define CMP_PD_BIT_NUMBER POSITION_VAL(SYSCFG_CMPCR_CMP_PD)
+#define CMPCR_CMP_PD_BB (uint32_t)(PERIPH_BB_BASE + (CMPCR_OFFSET * 32) + (CMP_PD_BIT_NUMBER * 4))
 /**
   * @}
   */
@@ -166,30 +163,30 @@ static __IO uint32_t uwTick;
   */
 HAL_StatusTypeDef HAL_Init(void)
 {
-  /* Configure Flash prefetch, Instruction cache, Data cache */ 
+    /* Configure Flash prefetch, Instruction cache, Data cache */
 #if (INSTRUCTION_CACHE_ENABLE != 0)
-   __HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
+    __HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
 #endif /* INSTRUCTION_CACHE_ENABLE */
 
 #if (DATA_CACHE_ENABLE != 0)
-   __HAL_FLASH_DATA_CACHE_ENABLE();
+    __HAL_FLASH_DATA_CACHE_ENABLE();
 #endif /* DATA_CACHE_ENABLE */
 
 #if (PREFETCH_ENABLE != 0)
-  __HAL_FLASH_PREFETCH_BUFFER_ENABLE();
+    __HAL_FLASH_PREFETCH_BUFFER_ENABLE();
 #endif /* PREFETCH_ENABLE */
 
-  /* Set Interrupt Group Priority */
-  HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);//�ж����ȼ�����4
+    /* Set Interrupt Group Priority */
+    HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4); //涓柇浼樺厛绾у垎缁�4
 
-  /* Use systick as time base source and configure 1ms tick (default clock after Reset is HSI) */
-  HAL_InitTick(TICK_INT_PRIORITY);
-  
-  /* Init the low level hardware */
-  HAL_MspInit();
-  
-  /* Return function status */
-  return HAL_OK;
+    /* Use systick as time base source and configure 1ms tick (default clock after Reset is HSI) */
+    HAL_InitTick(TICK_INT_PRIORITY);
+
+    /* Init the low level hardware */
+    HAL_MspInit();
+
+    /* Return function status */
+    return HAL_OK;
 }
 
 /**
@@ -199,27 +196,27 @@ HAL_StatusTypeDef HAL_Init(void)
   */
 HAL_StatusTypeDef HAL_DeInit(void)
 {
-  /* Reset of all peripherals */
-  __HAL_RCC_APB1_FORCE_RESET();
-  __HAL_RCC_APB1_RELEASE_RESET();
+    /* Reset of all peripherals */
+    __HAL_RCC_APB1_FORCE_RESET();
+    __HAL_RCC_APB1_RELEASE_RESET();
 
-  __HAL_RCC_APB2_FORCE_RESET();
-  __HAL_RCC_APB2_RELEASE_RESET();
+    __HAL_RCC_APB2_FORCE_RESET();
+    __HAL_RCC_APB2_RELEASE_RESET();
 
-  __HAL_RCC_AHB1_FORCE_RESET();
-  __HAL_RCC_AHB1_RELEASE_RESET();
+    __HAL_RCC_AHB1_FORCE_RESET();
+    __HAL_RCC_AHB1_RELEASE_RESET();
 
-  __HAL_RCC_AHB2_FORCE_RESET();
-  __HAL_RCC_AHB2_RELEASE_RESET();
+    __HAL_RCC_AHB2_FORCE_RESET();
+    __HAL_RCC_AHB2_RELEASE_RESET();
 
-  __HAL_RCC_AHB3_FORCE_RESET();
-  __HAL_RCC_AHB3_RELEASE_RESET();
+    __HAL_RCC_AHB3_FORCE_RESET();
+    __HAL_RCC_AHB3_RELEASE_RESET();
 
-  /* De-Init the low level hardware */
-  HAL_MspDeInit();
-    
-  /* Return function status */
-  return HAL_OK;
+    /* De-Init the low level hardware */
+    HAL_MspDeInit();
+
+    /* Return function status */
+    return HAL_OK;
 }
 
 /**
@@ -228,10 +225,10 @@ HAL_StatusTypeDef HAL_DeInit(void)
   */
 __weak void HAL_MspInit(void)
 {
-  /* Prevent unused argument(s) compilation warning */
-  __IO uint32_t tmpreg = 0x00;
-  UNUSED(tmpreg);
-  /* NOTE : This function Should not be modified, when the callback is needed,
+    /* Prevent unused argument(s) compilation warning */
+    __IO uint32_t tmpreg = 0x00;
+    UNUSED(tmpreg);
+    /* NOTE : This function Should not be modified, when the callback is needed,
             the HAL_MspInit could be implemented in the user file
    */
 }
@@ -242,12 +239,12 @@ __weak void HAL_MspInit(void)
   */
 __weak void HAL_MspDeInit(void)
 {
-  /* Prevent unused argument(s) compilation warning */
-  __IO uint32_t tmpreg = 0x00;
-  UNUSED(tmpreg);
-  /* NOTE : This function Should not be modified, when the callback is needed,
+    /* Prevent unused argument(s) compilation warning */
+    __IO uint32_t tmpreg = 0x00;
+    UNUSED(tmpreg);
+    /* NOTE : This function Should not be modified, when the callback is needed,
             the HAL_MspDeInit could be implemented in the user file
-   */ 
+   */
 }
 
 /**
@@ -268,14 +265,14 @@ __weak void HAL_MspDeInit(void)
   */
 __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 {
-  /*Configure the SysTick to have interrupt in 1ms time basis 将SysTick配置为在1ms时间内具有中断*/
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+    /*Configure the SysTick to have interrupt in 1ms time basis 鐏忓摖ysTick闁板秶鐤嗘稉鍝勬躬1ms閺冨爼妫块崘鍛徔閺堝鑵戦弬锟�*/
+    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 
-  /*Configure the SysTick IRQ priority */
-  HAL_NVIC_SetPriority(SysTick_IRQn, TickPriority ,0);
+    /*Configure the SysTick IRQ priority */
+    HAL_NVIC_SetPriority(SysTick_IRQn, TickPriority, 0);
 
-  /* Return function status */
-  return HAL_OK;
+    /* Return function status */
+    return HAL_OK;
 }
 
 /**
@@ -316,7 +313,7 @@ __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   */
 __weak void HAL_IncTick(void)
 {
-  uwTick++;
+    uwTick++;
 }
 
 /**
@@ -327,7 +324,7 @@ __weak void HAL_IncTick(void)
   */
 __weak uint32_t HAL_GetTick(void)
 {
-  return uwTick;
+    return uwTick;
 }
 
 /**
@@ -343,11 +340,11 @@ __weak uint32_t HAL_GetTick(void)
   */
 __weak void HAL_Delay(__IO uint32_t Delay)
 {
-  uint32_t tickstart = 0;
-  tickstart = HAL_GetTick();
-  while((HAL_GetTick() - tickstart) < Delay)
-  {
-  }
+    uint32_t tickstart = 0;
+    tickstart = HAL_GetTick();
+    while ((HAL_GetTick() - tickstart) < Delay)
+    {
+    }
 }
 
 /**
@@ -362,8 +359,8 @@ __weak void HAL_Delay(__IO uint32_t Delay)
   */
 __weak void HAL_SuspendTick(void)
 {
-  /* Disable SysTick Interrupt */
-  SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+    /* Disable SysTick Interrupt */
+    SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
 }
 
 /**
@@ -378,8 +375,8 @@ __weak void HAL_SuspendTick(void)
   */
 __weak void HAL_ResumeTick(void)
 {
-  /* Enable SysTick Interrupt */
-  SysTick->CTRL  |= SysTick_CTRL_TICKINT_Msk;
+    /* Enable SysTick Interrupt */
+    SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 }
 
 /**
@@ -388,7 +385,7 @@ __weak void HAL_ResumeTick(void)
   */
 uint32_t HAL_GetHalVersion(void)
 {
- return __STM32F4xx_HAL_VERSION;
+    return __STM32F4xx_HAL_VERSION;
 }
 
 /**
@@ -397,7 +394,7 @@ uint32_t HAL_GetHalVersion(void)
   */
 uint32_t HAL_GetREVID(void)
 {
-   return((DBGMCU->IDCODE) >> 16);
+    return ((DBGMCU->IDCODE) >> 16);
 }
 
 /**
@@ -406,7 +403,7 @@ uint32_t HAL_GetREVID(void)
   */
 uint32_t HAL_GetDEVID(void)
 {
-   return((DBGMCU->IDCODE) & IDCODE_DEVID_MASK);
+    return ((DBGMCU->IDCODE) & IDCODE_DEVID_MASK);
 }
 
 /**
@@ -415,7 +412,7 @@ uint32_t HAL_GetDEVID(void)
   */
 void HAL_DBGMCU_EnableDBGSleepMode(void)
 {
-  SET_BIT(DBGMCU->CR, DBGMCU_CR_DBG_SLEEP);
+    SET_BIT(DBGMCU->CR, DBGMCU_CR_DBG_SLEEP);
 }
 
 /**
@@ -424,7 +421,7 @@ void HAL_DBGMCU_EnableDBGSleepMode(void)
   */
 void HAL_DBGMCU_DisableDBGSleepMode(void)
 {
-  CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_SLEEP);
+    CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_SLEEP);
 }
 
 /**
@@ -433,7 +430,7 @@ void HAL_DBGMCU_DisableDBGSleepMode(void)
   */
 void HAL_DBGMCU_EnableDBGStopMode(void)
 {
-  SET_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STOP);
+    SET_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STOP);
 }
 
 /**
@@ -442,7 +439,7 @@ void HAL_DBGMCU_EnableDBGStopMode(void)
   */
 void HAL_DBGMCU_DisableDBGStopMode(void)
 {
-  CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STOP);
+    CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STOP);
 }
 
 /**
@@ -451,7 +448,7 @@ void HAL_DBGMCU_DisableDBGStopMode(void)
   */
 void HAL_DBGMCU_EnableDBGStandbyMode(void)
 {
-  SET_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STANDBY);
+    SET_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STANDBY);
 }
 
 /**
@@ -460,7 +457,7 @@ void HAL_DBGMCU_EnableDBGStandbyMode(void)
   */
 void HAL_DBGMCU_DisableDBGStandbyMode(void)
 {
-  CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STANDBY);
+    CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STANDBY);
 }
 
 /**
@@ -471,7 +468,7 @@ void HAL_DBGMCU_DisableDBGStandbyMode(void)
   */
 void HAL_EnableCompensationCell(void)
 {
-  *(__IO uint32_t *)CMPCR_CMP_PD_BB = (uint32_t)ENABLE;
+    *(__IO uint32_t *)CMPCR_CMP_PD_BB = (uint32_t)ENABLE;
 }
 
 /**
@@ -482,10 +479,10 @@ void HAL_EnableCompensationCell(void)
   */
 void HAL_DisableCompensationCell(void)
 {
-  *(__IO uint32_t *)CMPCR_CMP_PD_BB = (uint32_t)DISABLE;
+    *(__IO uint32_t *)CMPCR_CMP_PD_BB = (uint32_t)DISABLE;
 }
 
-#if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx)|| defined(STM32F439xx) ||\
+#if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx) || defined(STM32F439xx) || \
     defined(STM32F469xx) || defined(STM32F479xx)
 /**
   * @brief  Enables the Internal FLASH Bank Swapping.
@@ -499,7 +496,7 @@ void HAL_DisableCompensationCell(void)
   */
 void HAL_EnableMemorySwappingBank(void)
 {
-  *(__IO uint32_t *)UFB_MODE_BB = (uint32_t)ENABLE;
+    *(__IO uint32_t *)UFB_MODE_BB = (uint32_t)ENABLE;
 }
 
 /**
@@ -515,7 +512,7 @@ void HAL_EnableMemorySwappingBank(void)
 void HAL_DisableMemorySwappingBank(void)
 {
 
-  *(__IO uint32_t *)UFB_MODE_BB = (uint32_t)DISABLE;
+    *(__IO uint32_t *)UFB_MODE_BB = (uint32_t)DISABLE;
 }
 #endif /* STM32F427xx || STM32F437xx || STM32F429xx || STM32F439xx || STM32F469xx || STM32F479xx */
 
