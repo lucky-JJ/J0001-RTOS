@@ -1,7 +1,7 @@
 /*
  * @Author: J
  * @Date: 2020-07-28 10:59:07
- * @LastEditTime: 2020-07-29 18:21:56
+ * @LastEditTime: 2020-07-30 18:09:42
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \APP\Codes\ServiceLayer\ResourceConfig.h
@@ -12,27 +12,25 @@
 #include "Os.h"
 //#include "Swc.h"
 
-/* os task id config */
-#define TID_CanTask (0)
-#define TID_BswTask (1)
-#define TID_MiscTask (2)
-#define TID_AudioTask (3)
-#define TID_ComTask (4)
-#define TID_SecTask (5)
+typedef void (*TCfTaskFunc)(void);
+typedef void (*TCfHandleMsgFunc)(void *pParam, u16 Len);
 
 enum
 {
     /* os task id config */
-    TID_UartTask = 0,
-    TID_KeyTask,
-    TID_LedTask,
-    TID_LcdTask,
+    TID_Uart1 = 1,
+    TID_Key,
+    TID_Led,
+    TID_Lcd,
     TID_Max,
 
     /* semaphore id config  */
 
     /*Data Queue ID*/
-    DID_UartQueue = 0,
+    DID_Uart = 1,
+    DID_Key,
+    DID_Led,
+    DID_Lcd,
     DID_Max,
 
     /*MailBox ID*/
@@ -50,8 +48,10 @@ enum
 
 /* event config */
 
-#define EVT_ID_All_Task_TIMER_5MS (1 << 1)  // for All Task
-#define EVT_ID_All_Task_TIMER_10MS (1 << 2) // for All Task
+#define EVENT_GLOBAL_MAILBOX (1 << 0)       // for All Task
+#define EVENT_GLOBAL_Watchdog (1 << 1)      // for All Task
+#define EVT_ID_All_Task_TIMER_5MS (1 << 2)  // for All Task
+#define EVT_ID_All_Task_TIMER_10MS (1 << 3) // for All Task
 
 #define EVT_ID_CanTask_COM_UPDATE (1 << 0) // for CanTask
 #define EVT_ID_CanTask_TIMER_5MS (1 << 1)  // for CanTask

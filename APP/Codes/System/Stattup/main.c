@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-05-29 09:49:07
- * @LastEditTime: 2020-07-29 09:56:46
+ * @LastEditTime: 2020-07-30 15:30:04
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \APP\Codes\System\Stattup\main.c
@@ -57,9 +57,9 @@ int main(void)
     //debugandshell
     //watchdog
 
-    //cycleTaskInit();
+    cycleTaskInit();
 
-    //cfThreadInit();
+    cfThreadInit();
 
     StartOS();
 

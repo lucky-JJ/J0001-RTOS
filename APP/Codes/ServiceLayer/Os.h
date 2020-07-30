@@ -27,6 +27,12 @@ typedef SemaphoreHandle_t semaphore_t;
 #define OS_DONOTWAIT 0xFFFF
 //#endif
 
+typedef struct msgpkt
+{
+    u16 datalen;
+    u8 reserved[2];
+} SMP_MSG;
+
 /* Macro to declare ISR: always valid */
 #define DeclareIsr(f)   \
     FUNC(void, OS_CODE) \
@@ -81,10 +87,14 @@ typedef enum
 
 typedef Os_status_type Os_StatusType;
 
+#define TASK(TaskName) void TASK_##TaskName(void *pvParameters)
 #define TASK_NAME(name) (TID_##name)
+#define TASK_MAIN(name) void TASK_MAIN_##name(void)
+#define TASK_MSG_HANDLE(name) void TASK_MSG_HANDLE_##name(void)
+#define TASK_CREATE(name) void TASK_CREATE_##name(void)
+
 #define ALARM_NAME(name) (ALARM_ID_##name)
 #define SEM_MTX_NAME(name) (SID_##name)
-#define TASK(TaskName) void TASK_##TaskName(void *pvParameters)
 
 #define DisableOSInt()
 #define EnableOSInt()

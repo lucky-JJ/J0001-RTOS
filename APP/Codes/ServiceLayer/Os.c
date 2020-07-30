@@ -7,7 +7,7 @@ extern void vPortSetupTimerInterrupt(void);
 
 extern void vPortStopTimerInterrupt(void);
 
-extern bool IsIsrContext(void);
+extern bool IsIsrContext(void); //上下文切换检测
 /*FUNCTION**********************************************************************
  *
  * Function Name : OSIF_TimeDelay
@@ -100,6 +100,11 @@ uint32_t EvtGroupsWaitBits(const unsigned char TaskId, const uint32_t BitsToWait
     return Bits;
 }
 
+/**
+ * @description: OS 定时器回调函数,1ms一次
+ * @param {type} 
+ * @return: 
+ */
 void vApplicationTickHook(void)
 {
     Alarm_Counter(1);
@@ -324,6 +329,11 @@ u32 Os_SemWait(const u8 SemId, const u32 timeout)
     return osif_ret_code;
 }
 
+/**
+ * @description: 
+ * @param {type} 
+ * @return: 
+ */
 u32 Os_SemPost(const u8 SemId)
 {
     BaseType_t operation_status = pdFAIL;
@@ -391,6 +401,220 @@ const char *Os_GetCurTaskName(void)
 }
 
 /**
+*   \brief   for internal use :receive msg per mailbox
+*   \param
+*   \return E_OK if success, err code if fail
+*
+*/
+s32 OS_ReceiveMailboxInternal(u8 mbid, SMP_MSG **mb_msg, u32 timeout)
+{
+    BaseType_t RetVal = pdPASS;
+    QueueHandle_t xQueue = NULL;
+
+    xQueue = TaskMailBoxTbl[mbid];
+    if (xQueue != NULL)
+    {
+        if (timeout == OS_DONOTWAIT)
+        {
+            RetVal = xQueueReceive(xQueue, (u32 *)&mb_msg, 0);
+        }
+        else
+        {
+            if (timeout == OS_WAITFOREVER)
+            {
+                RetVal = xQueueReceive(xQueue, (u32 *)&mb_msg, portMAX_DELAY);
+            }
+            else
+            {
+                RetVal = xQueueReceive(xQueue, (u32 *)&mb_msg, (TickType_t)timeout);
+            }
+        }
+
+        if (pdPASS != RetVal)
+        {
+            mb_msg = NULL;
+            RetVal = 1;
+        }
+        else
+        {
+            RetVal = 0;
+        }
+    }
+    else
+    {
+    }
+
+    return (RetVal);
+}
+
+/**
+*   \brief   receive msg per mailbox ID
+*   \param
+*   \return E_OK if success, err code if fail
+*
+*/
+u32 OS_ReceiveMailbox(u8 mbid, u8 **pBuf, u16 *pBufLen, u32 timeout)
+{
+    u32 RetVal = 0;
+    SMP_MSG *mqMsg;
+    u8 *pData = NULL;
+
+    if ((NULL != pBuf) && (pBufLen != NULL))
+    {
+        RetVal = OS_ReceiveMailboxInternal((u8)mbid, &mqMsg, (u32)timeout);
+        if (0 == RetVal)
+        {
+            pData = (u8 *)mqMsg;
+            pData += sizeof(SMP_MSG);
+
+            *pBuf = pData;
+            *pBufLen = mqMsg->datalen;
+        }
+    }
+    else
+    {
+        RetVal = 1;
+    }
+
+    return RetVal;
+}
+
+static u32 OS_SendMailboxInternal(u8 mbid, SMP_MSG *mb_msg)
+{
+    u32 RetVal = 0;
+    bool is_isr;
+    BaseType_t xHigherPriorityTaskWoken;
+    QueueHandle_t xQueue;
+    BaseType_t xYieldRequired;
+
+    if (mbid > FREERTOS_MAX_TASK_NUM)
+    {
+        RetVal = 1;
+    }
+
+    xQueue = TaskMailBoxTbl[mbid];
+    if (xQueue != NULL)
+    {
+        is_isr = IsIsrContext();
+        if (is_isr)
+        {
+            xYieldRequired = xQueueSendFromISR(xQueue, (void *)&mb_msg, &xHigherPriorityTaskWoken);
+            if (xHigherPriorityTaskWoken)
+            {
+                // Actual macro used here is port specific.
+                portYIELD_FROM_ISR(xYieldRequired);
+            }
+        }
+        else
+        {
+            xQueueSend(xQueue, (void *)&mb_msg, 100);
+        }
+    }
+    else
+    {
+        RetVal = 2;
+    }
+
+    return RetVal;
+}
+
+u32 OS_SendMailbox(u8 mbid, u8 *pcMsg, u16 u16MsgLen)
+{
+    u32 RetVal = 0;
+    SMP_MSG *mqMsg = NULL;
+    u8 *pData = NULL;
+    u16 MemoryLen;
+    bool is_isr;
+
+    if ((NULL != pcMsg) && (u16MsgLen > 0))
+    {
+        is_isr = IsIsrContext();
+        if (is_isr == 0)
+        {
+            MemoryLen = (u16MsgLen + 3) & 0xfffc;
+            MemoryLen = MemoryLen + sizeof(SMP_MSG);
+
+            pData = pvPortMalloc(MemoryLen);
+            if (pData != NULL)
+            {
+                mqMsg = (SMP_MSG *)pData;
+                mqMsg->datalen = u16MsgLen;
+                pData += sizeof(SMP_MSG);
+
+                memcpy(pData, pcMsg, u16MsgLen);
+
+                RetVal = OS_SendMailboxInternal(mbid, mqMsg);
+                if (RetVal != 0)
+                {
+                    vPortFree(pData);
+                }
+            }
+            else
+            {
+                RetVal = 1;
+            }
+        }
+        else
+        {
+            RetVal = 2;
+        }
+    }
+    else
+    {
+        RetVal = 3;
+    }
+
+    return RetVal;
+}
+
+u32 OS_MQSend(u8 tskId, u8 *pcMsg, u16 u16MsgLen)
+{
+    u32 RetVal = 0;
+    u8 mbxId;
+    bool is_isr;
+
+    if ((tskId <= FREERTOS_MAX_TASK_NUM) && (NULL != pcMsg) && (u16MsgLen > 0))
+    {
+        is_isr = IsIsrContext();
+        if (is_isr == 1)
+        {
+            RetVal = 1;
+        }
+        else
+        {
+            mbxId = tskId;
+            if (0 == OS_SendMailbox(mbxId, pcMsg, u16MsgLen))
+            {
+                EventSendTask(tskId, EVT_ID_All_Task_NEW_MSG);
+            }
+            else
+            {
+                RetVal = 2;
+            }
+        }
+    }
+    else
+    {
+        RetVal = 3;
+    }
+
+    return RetVal;
+}
+
+void OS_FreeMailBoxMemory(void *pBuf)
+{
+    SMP_MSG *mqMsg = NULL;
+    pBuf = pBuf - sizeof(SMP_MSG);
+    mqMsg = (SMP_MSG *)pBuf;
+
+    vTaskSuspendAll();
+    uxListRemove(&(mqMsg->Item));
+    (void)xTaskResumeAll();
+
+    vPortFree(pBuf);
+}
+
+/**
  * Initialization of kernel structures and start of the first
  * task.
  */
@@ -405,6 +629,7 @@ void InitOS(void)
     /* mutex create init */
     TasksStaticCreate();
     /* swc init */
+    /*注册线程*/
     SwcGroupInit();
     /*alarm init*/
     Alarm_Init();

@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2020-05-29 09:49:07
+ * @LastEditTime: 2020-07-30 09:53:10
+ * @LastEditors: your name
+ * @Description: In User Settings Edit
+ * @FilePath: \J0001-RTOS\APP\Codes\ServiceLayer\osif_freertos.h
+ */
 #ifndef OSIF_FREERTOS_H
 #define OSIF_FREERTOS_H
 
@@ -15,30 +23,25 @@ typedef SemaphoreHandle_t semaphore_t;
 
 /*! @endcond */
 
-#define FEATURE_OSIF_FREERTOS_ISR_CONTEXT_METHOD         (1) /* Cortex M device */
-
-
-
+//#define FEATURE_OSIF_FREERTOS_ISR_CONTEXT_METHOD         (1) /* Cortex M device */
 
 #define OSIF_WAIT_FOREVER 0xFFFFFFFFu
 
+#define OS_WAITFOREVER 0x0000
 
-#define OS_WAITFOREVER     0x0000
+#define OS_DONOTWAIT 0xFFFF
 
-#define OS_DONOTWAIT       0xFFFF
+typedef void (*pTsk_Handler)(u32 exinf);
 
-typedef  void (*pTsk_Handler)(u32 exinf);
-
-
-typedef struct  msgpkt
+typedef struct msgpkt
 {
-    u16     datalen;
-	u8      reserved[2];
+    u16 datalen;
+    u8 reserved[2];
 } SMP_MSG;
 
-#define OSIF_FreeMailBoxMemory(pBuf)  (vPortFree(pBuf - sizeof(SMP_MSG)))
+#define OSIF_FreeMailBoxMemory(pBuf) (vPortFree(pBuf - sizeof(SMP_MSG)))
 
-#define OSIF_BASETASK(TaskName)  void TaskName##_Task(void *pvParameters)
+#define OSIF_BASETASK(TaskName) void TaskName##_Task(void *pvParameters)
 
 #define DisableOSInt(Int)
 #define EnableOSInt(Int)
@@ -67,7 +70,7 @@ u32 OSIF_EVSendTask(u8 tskId, s32 event);
 
 u32 OSIF_WaitEvent(u32 inEvents, u32 timeout);
 
-u8  OSIF_GetMailboxPool(u8 tskId);
+u8 OSIF_GetMailboxPool(u8 tskId);
 
 u32 OSIF_ReceiveMailbox(u8 mbid, u8 **pBuf, u16 *pBufLen, u32 timeout);
 

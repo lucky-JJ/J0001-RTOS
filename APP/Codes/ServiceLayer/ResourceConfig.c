@@ -36,134 +36,6 @@ extern void SWC_Time_Init(void);
 extern void SWC_Time_Main(void);
 extern uint8_t SWC_Time_handle(uint8_t flag, uint32_t id);
 
-extern void SWC_AirCtl_Create(void);
-extern void SWC_AirCtl_Init(void);
-extern void SWC_AirCtl_Main(void);
-extern uint8_t SWC_AirCtl_handle(uint8_t flag, uint32_t id);
-
-extern void SWC_Avm_Create(void);
-extern void SWC_Avm_Init(void);
-extern void SWC_Avm_Main(void);
-extern uint8_t SWC_Avm_handle(uint8_t flag, uint32_t id);
-
-extern void SWC_BCM_Create(void);
-extern void SWC_BCM_Init(void);
-extern void SWC_BCM_Main(void);
-extern uint8_t SWC_BCM_handle(uint8_t flag, uint32_t id);
-
-extern void SWC_Tbox_Create(void);
-extern void SWC_Tbox_Init(void);
-extern void SWC_Tbox_Main(void);
-extern uint8_t SWC_Tbox_handle(uint8_t flag, uint32_t id);
-
-extern void SWC_BswSrv_Create(void);
-extern void SWC_BswSrv_Init(void);
-extern void SWC_BswSrv_Main(void);
-extern uint8_t SWC_BswSrv_handle(uint8_t flag, uint32_t id);
-
-extern void SWC_Security_Create(void);
-extern void SWC_Security_Init(void);
-extern void SWC_Security_Main(void);
-extern uint8_t SWC_Security_handle(uint8_t flag, uint32_t id);
-
-extern void SWC_CAN_PDU_Create(void);
-extern void SWC_CAN_PDU_Init(void);
-extern void SWC_CAN_PDU_Main(void);
-extern uint8_t SWC_CAN_PDU_handle(uint8_t flag, uint32_t id);
-
-extern void SWC_SOC_PDU_Create(void);
-extern void SWC_SOC_PDU_Init(void);
-extern void SWC_SOC_PDU_Main(void);
-extern uint8_t SWC_SOC_PDU_handle(uint8_t flag, uint32_t id);
-
-extern void SWC_KeyApp_Create(void);
-extern void SWC_KeyApp_Init(void);
-extern void SWC_KeyApp_Main(void);
-extern uint8_t SWC_KeyApp_handle(uint8_t flag, uint32_t id);
-
-extern void SWC_Audio_Create(void);
-extern void SWC_Audio_Init(void);
-extern void SWC_Audio_Main(void);
-extern uint8_t SWC_Audio_handle(uint8_t flag, uint32_t id);
-
-/* event list(swc) declaration function */
-SwcEventMask_t TaskSwcEventList[TASK_NUM][MAX_EVENT_NUM] =
-    {
-        /* task:CanTask */
-        {
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-        },
-        /* task:BswTask */
-        {
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-        },
-        /* task:MiscTask */
-        {
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-        },
-        /* task:AudioTask */
-        {
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-        },
-        /* task:ComTask */
-        {
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-            {1, {
-                    SWC_NAME(SOC_PDU),
-                }},
-        },
-        /* task:SecTask */
-        {
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-            {0, {
-                    0,
-                }},
-        },
-
-};
-
 /* Module */
 
 // SWC CanTask
@@ -181,70 +53,6 @@ const Module_t Swc_AirCtl =
         SWC_AirCtl_Init,
         SWC_AirCtl_Main,
         SWC_AirCtl_handle,
-};
-
-static SwcDynData Swc_Avm_DynData =
-    {
-        0,
-};
-const Module_t Swc_Avm =
-    {
-        SWC_TRG_Periodic, /* SWC Trigger Mode */
-        10,               /* Periodic */
-        &Swc_Avm_DynData, /* SwcDynData */
-        "Avm",            /* swc name */
-        SWC_Avm_Create,
-        SWC_Avm_Init,
-        SWC_Avm_Main,
-        SWC_Avm_handle,
-};
-
-static SwcDynData Swc_BCM_DynData =
-    {
-        0,
-};
-const Module_t Swc_BCM =
-    {
-        SWC_TRG_Periodic, /* SWC Trigger Mode */
-        10,               /* Periodic */
-        &Swc_BCM_DynData, /* SwcDynData */
-        "BCM",            /* swc name */
-        SWC_BCM_Create,
-        SWC_BCM_Init,
-        SWC_BCM_Main,
-        SWC_BCM_handle,
-};
-
-static SwcDynData Swc_Tbox_DynData =
-    {
-        0,
-};
-const Module_t Swc_Tbox =
-    {
-        SWC_TRG_Periodic,  /* SWC Trigger Mode */
-        10,                /* Periodic */
-        &Swc_Tbox_DynData, /* SwcDynData */
-        "Tbox",            /* swc name */
-        SWC_Tbox_Create,
-        SWC_Tbox_Init,
-        SWC_Tbox_Main,
-        SWC_Tbox_handle,
-};
-
-static SwcDynData Swc_CAN_PDU_DynData =
-    {
-        0,
-};
-const Module_t Swc_CAN_PDU =
-    {
-        SWC_TRG_Periodic,     /* SWC Trigger Mode */
-        5,                    /* Periodic */
-        &Swc_CAN_PDU_DynData, /* SwcDynData */
-        "CAN_PDU",            /* swc name */
-        SWC_CAN_PDU_Create,
-        SWC_CAN_PDU_Init,
-        SWC_CAN_PDU_Main,
-        SWC_CAN_PDU_handle,
 };
 
 const Module_t *SwcGrpOfCanTask[] =
@@ -354,143 +162,7 @@ const Module_t Swc_KeyApp =
         SWC_KeyApp_handle,
 };
 
-const Module_t *SwcGrpOfMiscTask[] =
-    {
-        &Swc_Time,
-        &Swc_KeyApp,
-};
-
-TaskDynData Dync_MiscTask =
-    {
-        0,
-        0,
-};
-const ModuleOfTask_t SwcsOfMiscTask =
-    {
-        &Dync_MiscTask,
-        TASK_NAME(MiscTask),
-        2,
-        (Module_t **)SwcGrpOfMiscTask,
-};
-
-// SWC AudioTask
-static SwcDynData Swc_Audio_DynData =
-    {
-        0,
-};
-const Module_t Swc_Audio =
-    {
-        SWC_TRG_Periodic,   /* SWC Trigger Mode */
-        10,                 /* Periodic */
-        &Swc_Audio_DynData, /* SwcDynData */
-        "Audio",            /* swc name */
-        SWC_Audio_Create,
-        SWC_Audio_Init,
-        SWC_Audio_Main,
-        SWC_Audio_handle,
-};
-
-const Module_t *SwcGrpOfAudioTask[] =
-    {
-        &Swc_Audio,
-};
-
-TaskDynData Dync_AudioTask =
-    {
-        0,
-        0,
-};
-const ModuleOfTask_t SwcsOfAudioTask =
-    {
-        &Dync_AudioTask,
-        TASK_NAME(AudioTask),
-        1,
-        (Module_t **)SwcGrpOfAudioTask,
-};
-
-// SWC ComTask
-static SwcDynData Swc_SOC_PDU_DynData =
-    {
-        0,
-};
-const Module_t Swc_SOC_PDU =
-    {
-        SWC_TRG_Periodic,     /* SWC Trigger Mode */
-        10,                   /* Periodic */
-        &Swc_SOC_PDU_DynData, /* SwcDynData */
-        "SOC_PDU",            /* swc name */
-        SWC_SOC_PDU_Create,
-        SWC_SOC_PDU_Init,
-        SWC_SOC_PDU_Main,
-        SWC_SOC_PDU_handle,
-};
-
-const Module_t *SwcGrpOfComTask[] =
-    {
-        &Swc_SOC_PDU,
-};
-
-TaskDynData Dync_ComTask =
-    {
-        0,
-        0,
-};
-const ModuleOfTask_t SwcsOfComTask =
-    {
-        &Dync_ComTask,
-        TASK_NAME(ComTask),
-        1,
-        (Module_t **)SwcGrpOfComTask,
-};
-
-// SWC SecTask
-static SwcDynData Swc_Security_DynData =
-    {
-        0,
-};
-const Module_t Swc_Security =
-    {
-        SWC_TRG_Periodic,      /* SWC Trigger Mode */
-        5,                     /* Periodic */
-        &Swc_Security_DynData, /* SwcDynData */
-        "Security",            /* swc name */
-        SWC_Security_Create,
-        SWC_Security_Init,
-        SWC_Security_Main,
-        SWC_Security_handle,
-};
-
-const Module_t *SwcGrpOfSecTask[] =
-    {
-        &Swc_Security,
-};
-
-TaskDynData Dync_SecTask =
-    {
-        0,
-        0,
-};
-const ModuleOfTask_t SwcsOfSecTask =
-    {
-        &Dync_SecTask,
-        TASK_NAME(SecTask),
-        1,
-        (Module_t **)SwcGrpOfSecTask,
-};
-
 /* Task stk&tcb Buffer */
-static StackType_t xTaskCanTask_StkBuffer[200];
-static StaticTask_t xTaskCanTask_TcbBuffer;
-static StackType_t xTaskBswTask_StkBuffer[200];
-static StaticTask_t xTaskBswTask_TcbBuffer;
-static StackType_t xTaskMiscTask_StkBuffer[200];
-static StaticTask_t xTaskMiscTask_TcbBuffer;
-static StackType_t xTaskAudioTask_StkBuffer[200];
-static StaticTask_t xTaskAudioTask_TcbBuffer;
-static StackType_t xTaskComTask_StkBuffer[200];
-static StaticTask_t xTaskComTask_TcbBuffer;
-static StackType_t xTaskSecTask_StkBuffer[200];
-static StaticTask_t xTaskSecTask_TcbBuffer;
 
 //任务堆栈大小
 #define xTaskUartTask_STK_SIZE 200
@@ -519,7 +191,7 @@ uint32_t TasksStaticCreate(void)
 {
     TaskHandle_t xHandle = NULL;
 
-    xHandle = xTaskCreateStatic(TASK_UartTask,              //任务函数
+    xHandle = xTaskCreateStatic(TASK_Uart1,                 //任务函数
                                 "UartTask",                 //任务名称
                                 xTaskUartTask_STK_SIZE,     //任务堆栈大小
                                 NULL,                       //传递给任务函数的参数
@@ -535,7 +207,7 @@ uint32_t TasksStaticCreate(void)
         return 1;
     }
 
-    xHandle = xTaskCreateStatic(TASK_KeyTask,
+    xHandle = xTaskCreateStatic(TASK_Key,
                                 "KeyTask",
                                 xTaskKeyTask_STK_SIZE,
                                 NULL,
@@ -618,20 +290,31 @@ uint32_t TasksStaticCreate(void)
     return 0;
 }
 
-QueueHandle_t TaskDataQueueTbl[configQUEUE_REGISTRY_SIZE];
-QueueHandle_t TaskMailBoxTbl[DID_Max];
-
 #define xUartQueueLength 256
-StaticQueue_t xQueueUartBuf;
+#define xKeyQueueLength 32
+#define xLedQueueLength 32
+#define xLcdQueueLength 128
 
-StaticQueue_t xQueueBuf[DID_Max];
+static u32 xQueueUartStroage[xUartQueueLength];
+static u32 xQueueKeyStroage[xKeyQueueLength];
+static u32 xQueueLedStroage[xLedQueueLength];
+static u32 xQueueLcdStroage[xLcdQueueLength];
 
+static StaticQueue_t xQueueBuf[DID_Max];
+static QueueHandle_t TaskDataQueueTbl[configQUEUE_REGISTRY_SIZE];
+static List_t TaskMailBoxTbl[DID_Max];
+
+/**
+ * @description: 静态创建数据队列
+ * @param {type} 
+ * @return: 
+ */
 u8 DataQueueCreateStatic(void)
 {
     QueueHandle_t xQueue = NULL;
     u8 Index;
 
-    xQueue = xQueueCreateStatic(xUartQueueLength, sizeof(u32), (u8 *)&xQueueUartStroage[0], &xQueueUartBuf);
+    xQueue = xQueueCreateStatic(xUartQueueLength, sizeof(u32), (u8 *)&xQueueUartStroage[0], &xQueueBuf[DID_Uart]);
     if (xQueue != NULL)
     {
 #if (configQUEUE_REGISTRY_SIZE > 0)
@@ -645,55 +328,91 @@ u8 DataQueueCreateStatic(void)
         return 1;
     }
 
+    xQueue = xQueueCreateStatic(xKeyQueueLength, sizeof(u32), (u8 *)&xQueueKeyStroage[0], &xQueueBuf[DID_Key]);
+    if (xQueue != NULL)
+    {
+#if (configQUEUE_REGISTRY_SIZE > 0)
+        /* We want this queue to be viewable in a RTOS kernel aware debugger, so register it. */
+        vQueueAddToRegistry(xQueue, "Key");
+#endif
+        TaskDataQueueTbl[DID_Key] = xQueue;
+    }
+    else
+    {
+        return 1;
+    }
+
+    xQueue = xQueueCreateStatic(xLedQueueLength, sizeof(u32), (u8 *)&xQueueLedStroage[0], &xQueueBuf[DID_Led]);
+    if (xQueue != NULL)
+    {
+#if (configQUEUE_REGISTRY_SIZE > 0)
+        /* We want this queue to be viewable in a RTOS kernel aware debugger, so register it. */
+        vQueueAddToRegistry(xQueue, "Uart");
+#endif
+        TaskDataQueueTbl[DID_Uart] = xQueue;
+    }
+    else
+    {
+        return 1;
+    }
+
+    xQueue = xQueueCreateStatic(xLcdQueueLength, sizeof(u32), (u8 *)&xQueueLcdStroage[0], &xQueueBuf[DID_Lcd]);
+    if (xQueue != NULL)
+    {
+#if (configQUEUE_REGISTRY_SIZE > 0)
+        /* We want this queue to be viewable in a RTOS kernel aware debugger, so register it. */
+        vQueueAddToRegistry(xQueue, "Lcd");
+#endif
+        TaskDataQueueTbl[DID_Lcd] = xQueue;
+    }
+    else
+    {
+        return 1;
+    }
+
     for (Index = 0; Index < DID_Max; Index++)
     {
-
-        //xQueue = xQueueCreateStatic();
-
         vListInitialise(&TaskMailBoxTbl[Index]);
     }
 
     return 0;
 }
 
-void SwcGroupInit(void)
+/**
+ * @description: 组册任务
+ * @param {type} 
+ * @return: 
+ */
+void OS_ThreadCreate(void)
 {
+    TASK_CREATE_Uart1();
+    TASK_CREATE_Key();
+    TASK_CREATE_Led();
+    TASK_CREATE_Lcd();
+
+    /*
     SwcGroupHandleCreateFunction(&SwcsOfCanTask);
     SwcGroupHandleCreateFunction(&SwcsOfBswTask);
     SwcGroupHandleCreateFunction(&SwcsOfMiscTask);
     SwcGroupHandleCreateFunction(&SwcsOfAudioTask);
     SwcGroupHandleCreateFunction(&SwcsOfComTask);
-    SwcGroupHandleCreateFunction(&SwcsOfSecTask);
+    SwcGroupHandleCreateFunction(&SwcsOfSecTask);*/
 }
 
-/* TASK Function */
-TASK(UartTask)
+typedef void (*TCfTaskFunc)(void);
+typedef void (*TCfHandleMsgFunc)(void *pParam, u16 Len);
+void cfThreadCreate(u8 tskId, TCfTaskFunc func, TCfHandleMsgFunc msgFunc)
 {
-    EvtBits_t EvtBit;
-
-    SwcGroupHandleInitFunction(&SwcsOfCanTask);
-    MessageReadyListInit(&TaskMsgReadyList[TASK_NAME(UartTask)][0], MESSAGE_LIST_SIZE(COM_RECEIVE_MESSAGE_COUNT, 32));
-    for (;;)
-    {
-        EvtBit = EvtGroupsWaitBits(TASK_NAME(UartTask),
-                                   (EVT_ID_CanTask_COM_UPDATE | EVT_ID_All_Task_TIMER_5MS));
-
-        if (EvtBit & EVT_ID_CanTask_COM_UPDATE)
-        {
-            SwcGroupHandleMessage(&SwcsOfCanTask, TASK_NAME(UartTask));
-        }
-        else if (EvtBit & EVT_ID_All_Task_TIMER_5MS)
-        {
-            SwcGroupHandleMainFunction(&SwcsOfCanTask, 5);
-        }
-        else
-        {
-            SwcGroupHandleEvent(&SwcsOfCanTask, EvtBit);
-        }
-    }
+    pFunc##osName = func;
+    pMsgFunc##osName = msgFunc;
 }
 
-TASK(KeyTask)
+/**
+ * @description: 主线任务入口
+ * @param {type} 
+ * @return: 
+ */
+TASK(Key)
 {
     EvtBits_t EvtBit;
 
