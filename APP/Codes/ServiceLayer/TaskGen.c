@@ -8,7 +8,7 @@
 
 TaskHandle_t TaskTcbTbl[TID_Max];
 QueueHandle_t TaskDataQueueTbl[TID_Max];
-QueueHandle_t TaskMailBoxTbl[TID_Max];
+//QueueHandle_t TaskMailBoxTbl[TID_Max];
 SemaphoreHandle_t SemphrTbl[TID_Max];
 
 /*声明在osal.c中定义的osName##_Task*/

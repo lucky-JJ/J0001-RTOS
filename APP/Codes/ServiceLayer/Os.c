@@ -1,5 +1,13 @@
+/*
+ * @Author: your name
+ * @Date: 2020-07-28 09:50:44
+ * @LastEditTime: 2020-07-31 18:05:52
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \J0001-RTOS\APP\Codes\ServiceLayer\Os.c
+ */
 #include "Os.h"
-//#include "ResourceConfig.h"
+#include "ResourceConfig.h"
 
 #define MSEC_TO_TICK(msec) (pdMS_TO_TICKS(msec))
 
@@ -385,14 +393,27 @@ void SuspendAllInterrupts(void)
     taskDISABLE_INTERRUPTS();
 }
 
-void Os_TaskResumeAll(void)
-{
-    xTaskResumeAll();
-}
-
+/**
+ * @description: 调度锁开启
+ * @param {type} 
+ * @note:   1. 调度锁函数只是禁止了任务调度，并没有关闭任何中断。
+            2. 调度锁开启函数 vTaskSuspendAll 和调度锁关闭函数 xTaskResumeAll 一定要成对使用。
+            3. 切不可在调度锁开启函数 vTaskSuspendAll 和调度锁关闭函数 xTaskResumeAll 之间调用任何会引
+            起任务切换的 API，比如 vTaskDelayUntil、vTaskDelay、xQueueSend 等
+ * @return: 
+ */
 void Os_TaskSuspendAll(void)
 {
     vTaskSuspendAll();
+}
+/**
+ * @description: 调度锁关闭
+ * @param {type} 
+ * @return: 
+ */
+void Os_TaskResumeAll(void)
+{
+    xTaskResumeAll();
 }
 
 const char *Os_GetCurTaskName(void)
@@ -408,10 +429,44 @@ const char *Os_GetCurTaskName(void)
 */
 s32 OS_ReceiveMailboxInternal(u8 mbid, SMP_MSG **mb_msg, u32 timeout)
 {
+#if (USE_TASK_MAIL_BOX_LIST == 1)
+    u32 RetVal = 0;
+    List_t *pList;
+    ListItem_t *pxIterator;
+
+    (void)timeout;
+
+    if (mbid > FREERTOS_MAX_TASK_NUM || mb_msg == NULL)
+    {
+        RetVal = 1;
+    }
+    else
+    {
+        pList = &TaskMailBoxTbl[mbid];
+        if (listLIST_IS_EMPTY(pList))
+        {
+            RetVal = 2;
+        }
+        else
+        {
+            pxIterator = (ListItem_t *)&(pList->xListEnd);
+            if (0 < pList->uxNumberOfItems)
+            {
+                *mb_msg = (SMP_MSG *)pxIterator->pxNext->xItemValue;
+            }
+            else
+            {
+                *mb_msg = NULL;
+            }
+        }
+    }
+
+    return (RetVal);
+#else
     BaseType_t RetVal = pdPASS;
     QueueHandle_t xQueue = NULL;
 
-    xQueue = TaskMailBoxTbl[mbid];
+    xQueue = TaskDataQueueTbl[mbid];
     if (xQueue != NULL)
     {
         if (timeout == OS_DONOTWAIT)
@@ -445,12 +500,13 @@ s32 OS_ReceiveMailboxInternal(u8 mbid, SMP_MSG **mb_msg, u32 timeout)
     }
 
     return (RetVal);
+#endif
 }
 
 /**
 *   \brief   receive msg per mailbox ID
 *   \param
-*   \return E_OK if success, err code if fail
+*   \return E_OK if success = 0, err code if fail = 1
 *
 */
 u32 OS_ReceiveMailbox(u8 mbid, u8 **pBuf, u16 *pBufLen, u32 timeout)
@@ -481,6 +537,27 @@ u32 OS_ReceiveMailbox(u8 mbid, u8 **pBuf, u16 *pBufLen, u32 timeout)
 
 static u32 OS_SendMailboxInternal(u8 mbid, SMP_MSG *mb_msg)
 {
+#if (USE_TASK_MAIL_BOX_LIST == 1)
+    u32 RetVal = 0;
+    List_t *pList;
+    SMP_MSG *mqMsg = NULL;
+
+    if (mbid > FREERTOS_MAX_TASK_NUM || mb_msg == NULL)
+    {
+        RetVal = 1;
+    }
+    else
+    {
+        pList = &TaskMailBoxTbl[mbid];
+        mqMsg = (SMP_MSG *)mb_msg;
+
+        vTaskSuspendAll();
+        vListInsertEnd(pList, &(mqMsg->Item));
+        (void)xTaskResumeAll();
+    }
+
+    return RetVal;
+#else
     u32 RetVal = 0;
     bool is_isr;
     BaseType_t xHigherPriorityTaskWoken;
@@ -492,7 +569,7 @@ static u32 OS_SendMailboxInternal(u8 mbid, SMP_MSG *mb_msg)
         RetVal = 1;
     }
 
-    xQueue = TaskMailBoxTbl[mbid];
+    xQueue = TaskDataQueueTbl[mbid];
     if (xQueue != NULL)
     {
         is_isr = IsIsrContext();
@@ -516,6 +593,7 @@ static u32 OS_SendMailboxInternal(u8 mbid, SMP_MSG *mb_msg)
     }
 
     return RetVal;
+#endif
 }
 
 u32 OS_SendMailbox(u8 mbid, u8 *pcMsg, u16 u16MsgLen)
@@ -542,6 +620,10 @@ u32 OS_SendMailbox(u8 mbid, u8 *pcMsg, u16 u16MsgLen)
                 pData += sizeof(SMP_MSG);
 
                 memcpy(pData, pcMsg, u16MsgLen);
+
+#if (USE_TASK_MAIL_BOX_LIST == 1)
+                mqMsg->Item.xItemValue = (u32)mqMsg;
+#endif
 
                 RetVal = OS_SendMailboxInternal(mbid, mqMsg);
                 if (RetVal != 0)
@@ -585,7 +667,7 @@ u32 OS_MQSend(u8 tskId, u8 *pcMsg, u16 u16MsgLen)
             mbxId = tskId;
             if (0 == OS_SendMailbox(mbxId, pcMsg, u16MsgLen))
             {
-                EventSendTask(tskId, EVT_ID_All_Task_NEW_MSG);
+                EventSendTask(tskId, EVENT_GLOBAL_MAILBOX);
             }
             else
             {
@@ -620,7 +702,7 @@ void OS_FreeMailBoxMemory(void *pBuf)
  */
 void InitOS(void)
 {
-
+    __disable_irq();
     /* event group init */
     /* sem create init */
     SemphrCreateStatic();
@@ -628,11 +710,8 @@ void InitOS(void)
     DataQueueCreateStatic();
     /* mutex create init */
     TasksStaticCreate();
-    /* swc init */
-    /*注册线程*/
-    SwcGroupInit();
     /*alarm init*/
-    Alarm_Init();
+    //Alarm_Init();
 
     __enable_irq();
     // Now all tasks should be created.

@@ -20,6 +20,10 @@ typedef SemaphoreHandle_t mutex_t;
 /*! @brief Type for a semaphore. */
 typedef SemaphoreHandle_t semaphore_t;
 
+#define FREERTOS_MAX_TASK_NUM (9)
+
+#define USE_TASK_MAIL_BOX_LIST (1)
+
 #define OSIF_WAIT_FOREVER 0xFFFFFFFFu
 
 #define OS_WAITFOREVER 0x0000
@@ -29,9 +33,19 @@ typedef SemaphoreHandle_t semaphore_t;
 
 typedef struct msgpkt
 {
+#if (USE_TASK_MAIL_BOX_LIST == 1)
+    ListItem_t Item;
+#endif
     u16 datalen;
     u8 reserved[2];
 } SMP_MSG;
+
+typedef u16 MsgSize_t;
+typedef struct EventTag
+{
+    volatile MsgSize_t Type;
+    u8 _Reserved[2];
+} Message_t;
 
 /* Macro to declare ISR: always valid */
 #define DeclareIsr(f)   \
@@ -151,4 +165,9 @@ void ResumeAllInterrupts(void);
 void SuspendAllInterrupts(void);
 
 const char *Os_GetCurTaskName(void);
+
+u32 OS_ReceiveMailbox(u8 mbid, u8 **pBuf, u16 *pBufLen, u32 timeout);
+u32 OS_SendMailbox(u8 mbid, u8 *pcMsg, u16 u16MsgLen);
+u32 OS_MQSend(u8 tskId, u8 *pcMsg, u16 u16MsgLen);
+
 //#endif

@@ -1,26 +1,26 @@
 /*
  * @Author: your name
  * @Date: 2020-05-29 09:49:07
- * @LastEditTime: 2020-07-30 15:30:04
+ * @LastEditTime: 2020-07-31 18:05:17
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \APP\Codes\System\Stattup\main.c
  */
 
 #include "sys.h"
-#include "delay.h"
-#include "usart.h"
+//#include "delay.h"
+//#include "usart.h"
 //#include "led.h"
-#include "FreeRTOS.h"
-#include "task.h"
+//#include "FreeRTOS.h"
+//#include "task.h"
 
 //#include "osal.h"
-#include "app.h"
+//#include "app.h"
 
 #include "GPIO.h"
 #include "cychdr.h"
 
-#include "Os_Init"
+#include "Os.h"
 #include "Irq.h"
 
 /*
@@ -41,6 +41,8 @@ int main(void)
 
     Gpio_Init(&Gpio_InitConfigArr[0]);
 
+    cycleTaskInit();
+
     // Initialize the OS
     InitOS();
     // Setup interrupts
@@ -57,9 +59,7 @@ int main(void)
     //debugandshell
     //watchdog
 
-    cycleTaskInit();
-
-    cfThreadInit();
+    //cfThreadInit();
 
     StartOS();
 

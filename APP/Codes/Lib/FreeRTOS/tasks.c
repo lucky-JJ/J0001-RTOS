@@ -2031,13 +2031,15 @@ BaseType_t xTaskResumeAll(void)
     taskENTER_CRITICAL();
     {
         --uxSchedulerSuspended;
-
+        //如果等于0，则允许调度
         if (uxSchedulerSuspended == (UBaseType_t)pdFALSE)
         {
             if (uxCurrentNumberOfTasks > (UBaseType_t)0U)
             {
                 /* Move any readied tasks from the pending list into the
-				appropriate ready list. */
+				appropriate ready list. 
+                将所有在xPendingReadyList中的任务移到对应的就绪链表中
+                */
                 while (listLIST_IS_EMPTY(&xPendingReadyList) == pdFALSE)
                 {
                     pxTCB = (TCB_t *)listGET_OWNER_OF_HEAD_ENTRY((&xPendingReadyList));
@@ -2046,7 +2048,9 @@ BaseType_t xTaskResumeAll(void)
                     prvAddTaskToReadyList(pxTCB);
 
                     /* If the moved task has a priority higher than the current
-					task then a yield must be performed. */
+					task then a yield must be performed. 
+                     如果我们移动的任务优先级高于当前任务优先级，则需要调度
+                    */
                     if (pxTCB->uxPriority >= pxCurrentTCB->uxPriority)
                     {
                         xYieldPending = pdTRUE;
@@ -2575,7 +2579,7 @@ BaseType_t xTaskIncrementTick(void)
 						state -	so record the item value in
 						xNextTaskUnblockTime. */
 
-                        /* 任务还未到解除阻塞时间?将当前任务唤醒时间设置为下次解除阻塞时间. */
+                        /* 任务还未到解除阻塞时间,将当前任务唤醒时间设置为下次解除阻塞时间. */
 
                         xNextTaskUnblockTime = xItemValue;
                         break;
@@ -2592,7 +2596,7 @@ BaseType_t xTaskIncrementTick(void)
                     /* Is the task waiting on an event also?  If so remove
 					it from the event list. */
 
-                    /* 是因为等待事件而阻塞?是的话将到期任务从事件列表中删除 */
+                    /* 是因为等待事件而阻塞,是的话将到期任务从事件列表中删除 */
                     if (listLIST_ITEM_CONTAINER(&(pxTCB->xEventListItem)) != NULL)
                     {
                         (void)uxListRemove(&(pxTCB->xEventListItem));
@@ -2666,6 +2670,7 @@ BaseType_t xTaskIncrementTick(void)
     }
     else
     {
+        /*调度器被挂起, 挂起时间加1*/
         ++uxPendedTicks;
 
 /* The tick hook gets called at regular intervals, even if the
@@ -2680,9 +2685,13 @@ BaseType_t xTaskIncrementTick(void)
 #if (configUSE_PREEMPTION == 1)
     {
         /* 如果在中断中调用的API函数唤醒了更高优先级的任务,并且API函数的参数
-		pxHigherPriorityTaskWoken为NULL时,变量xYieldPending用于上下文切换标志 */
+		pxHigherPriorityTaskWoken为NULL时,变量xYieldPending用于上下文切换标志
+        
+        前面有程序因为各种原因，要求延迟到现在切换 
+
+         */
         if (xYieldPending != pdFALSE)
-        {
+        { /* 请求切换任务，最终进入PendSV异常，是否切换上下文还是在于PendSV */
             xSwitchRequired = pdTRUE;
         }
         else
@@ -2791,7 +2800,10 @@ void vTaskSwitchContext(void)
     if (uxSchedulerSuspended != (UBaseType_t)pdFALSE)
     {
         /* The scheduler is currently suspended - do not allow a context
-		switch. */
+		switch. 
+        
+        调度器被挂起 ,等到下一次节拍时在切换上下文
+        */
         xYieldPending = pdTRUE;
     }
     else

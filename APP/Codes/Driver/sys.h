@@ -73,14 +73,6 @@ typedef enum
     MSG_USER_DEFINE,
 } EnumReservedMsg_t;
 
-typedef u16 MsgSize_t;
-
-typedef struct EventTag
-{
-    volatile MsgSize_t Type;
-    u8 _Reserved[2];
-} Message_t;
-
 /** Returns the minimum value out of two values */
 #define MIN_VAL(X, Y) ((X) < (Y) ? (X) : (Y))
 

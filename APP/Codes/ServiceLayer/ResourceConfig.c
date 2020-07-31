@@ -3,6 +3,7 @@
 #include "ResourceConfig.h"
 #include <stdio.h>
 #include "queue.h"
+#include "list.h"
 
 /* Message id bit table of every task   */
 uint32_t TaskMsgReadyList[TASK_NUM][MESSAGE_LIST_SIZE(COM_RECEIVE_MESSAGE_COUNT, 32)];
@@ -18,151 +19,15 @@ static StaticSemaphore_t xSemaphore_DbgMutex_buf;
 static StaticSemaphore_t xSemaphore_I2C0Sem_buf;
 
 /* os task declaration function */
-extern void TASK_CanTask(void *pvParameters);
-extern void TASK_BswTask(void *pvParameters);
-extern void TASK_MiscTask(void *pvParameters);
-extern void TASK_AudioTask(void *pvParameters);
-extern void TASK_ComTask(void *pvParameters);
-extern void TASK_SecTask(void *pvParameters);
-
-/* module(swc) declaration function */
-extern void SWC_PwrMgr_Create(void);
-extern void SWC_PwrMgr_Init(void);
-extern void SWC_PwrMgr_Main(void);
-extern uint8_t SWC_PwrMgr_handle(uint8_t flag, uint32_t id);
-
-extern void SWC_Time_Create(void);
-extern void SWC_Time_Init(void);
-extern void SWC_Time_Main(void);
-extern uint8_t SWC_Time_handle(uint8_t flag, uint32_t id);
-
-/* Module */
-
-// SWC CanTask
-static SwcDynData Swc_AirCtl_DynData =
-    {
-        0,
-};
-const Module_t Swc_AirCtl =
-    {
-        SWC_TRG_Periodic,    /* SWC Trigger Mode */
-        20,                  /* Periodic */
-        &Swc_AirCtl_DynData, /* SwcDynData */
-        "AirCtl",            /* swc name */
-        SWC_AirCtl_Create,
-        SWC_AirCtl_Init,
-        SWC_AirCtl_Main,
-        SWC_AirCtl_handle,
-};
-
-const Module_t *SwcGrpOfCanTask[] =
-    {
-        &Swc_AirCtl,
-        &Swc_Avm,
-        &Swc_BCM,
-        &Swc_Tbox,
-        &Swc_CAN_PDU,
-};
-
-TaskDynData Dync_CanTask =
-    {
-        0,
-        0,
-};
-const ModuleOfTask_t SwcsOfCanTask =
-    {
-        &Dync_CanTask,
-        TASK_NAME(CanTask),
-        5,
-        (Module_t **)SwcGrpOfCanTask,
-};
-
-// SWC BswTask
-static SwcDynData Swc_PwrMgr_DynData =
-    {
-        0,
-};
-const Module_t Swc_PwrMgr =
-    {
-        SWC_TRG_Periodic,    /* SWC Trigger Mode */
-        10,                  /* Periodic */
-        &Swc_PwrMgr_DynData, /* SwcDynData */
-        "PwrMgr",            /* swc name */
-        SWC_PwrMgr_Create,
-        SWC_PwrMgr_Init,
-        SWC_PwrMgr_Main,
-        SWC_PwrMgr_handle,
-};
-
-static SwcDynData Swc_BswSrv_DynData =
-    {
-        0,
-};
-const Module_t Swc_BswSrv =
-    {
-        SWC_TRG_Periodic,    /* SWC Trigger Mode */
-        10,                  /* Periodic */
-        &Swc_BswSrv_DynData, /* SwcDynData */
-        "BswSrv",            /* swc name */
-        SWC_BswSrv_Create,
-        SWC_BswSrv_Init,
-        SWC_BswSrv_Main,
-        SWC_BswSrv_handle,
-};
-
-const Module_t *SwcGrpOfBswTask[] =
-    {
-        &Swc_PwrMgr,
-        &Swc_BswSrv,
-};
-
-TaskDynData Dync_BswTask =
-    {
-        0,
-        0,
-};
-const ModuleOfTask_t SwcsOfBswTask =
-    {
-        &Dync_BswTask,
-        TASK_NAME(BswTask),
-        2,
-        (Module_t **)SwcGrpOfBswTask,
-};
-
-// SWC MiscTask
-static SwcDynData Swc_Time_DynData =
-    {
-        0,
-};
-const Module_t Swc_Time =
-    {
-        SWC_TRG_Periodic,  /* SWC Trigger Mode */
-        100,               /* Periodic */
-        &Swc_Time_DynData, /* SwcDynData */
-        "Time",            /* swc name */
-        SWC_Time_Create,
-        SWC_Time_Init,
-        SWC_Time_Main,
-        SWC_Time_handle,
-};
-
-static SwcDynData Swc_KeyApp_DynData =
-    {
-        0,
-};
-const Module_t Swc_KeyApp =
-    {
-        SWC_TRG_Periodic,    /* SWC Trigger Mode */
-        10,                  /* Periodic */
-        &Swc_KeyApp_DynData, /* SwcDynData */
-        "KeyApp",            /* swc name */
-        SWC_KeyApp_Create,
-        SWC_KeyApp_Init,
-        SWC_KeyApp_Main,
-        SWC_KeyApp_handle,
-};
+extern void TASK_Uart1(void *pvParameters);
+extern void TASK_Key(void *pvParameters);
+extern void TASK_Led(void *pvParameters);
+extern void TASK_Lcd(void *pvParameters);
 
 /* Task stk&tcb Buffer */
+
+//任务句柄
+static TaskHandle_t TaskTcbTbl[TID_Max];
 
 //任务堆栈大小
 #define xTaskUartTask_STK_SIZE 200
@@ -187,7 +52,7 @@ static StaticTask_t xTaskLcdTask_TcbBuffer;
  * @param {type} 
  * @return: 
  */
-uint32_t TasksStaticCreate(void)
+u8 TasksStaticCreate(void)
 {
     TaskHandle_t xHandle = NULL;
 
@@ -200,7 +65,7 @@ uint32_t TasksStaticCreate(void)
                                 &xTaskUartTask_TcbBuffer);  //任务控制块
     if (xHandle != NULL)
     {
-        TaskList[TID_UartTask] = (uint32_t *)xHandle;
+        TaskTcbTbl[TID_Uart1] = (uint32_t *)xHandle;
     }
     else
     {
@@ -216,7 +81,7 @@ uint32_t TasksStaticCreate(void)
                                 &xTaskKeyTask_TcbBuffer);
     if (xHandle != NULL)
     {
-        TaskList[TID_KeyTask] = (uint32_t *)xHandle;
+        TaskTcbTbl[TID_Key] = (uint32_t *)xHandle;
     }
     else
     {
@@ -232,7 +97,7 @@ uint32_t TasksStaticCreate(void)
                                 &xTaskLedTask_TcbBuffer);
     if (xHandle != NULL)
     {
-        TaskList[TID_LedTask] = (uint32_t *)xHandle;
+        TaskTcbTbl[TID_Led] = (uint32_t *)xHandle;
     }
     else
     {
@@ -248,39 +113,7 @@ uint32_t TasksStaticCreate(void)
                                 &xTaskLcdTask_TcbBuffer);
     if (xHandle != NULL)
     {
-        TaskList[TID_LcdTask] = (uint32_t *)xHandle;
-    }
-    else
-    {
-        return 1;
-    }
-
-    xHandle = xTaskCreateStatic(TASK_ComTask,
-                                "ComTask",
-                                200,
-                                NULL,
-                                (configMAX_PRIORITIES - 1),
-                                xTaskComTask_StkBuffer,
-                                &xTaskComTask_TcbBuffer);
-    if (xHandle != NULL)
-    {
-        TaskList[TID_ComTask] = (uint32_t *)xHandle;
-    }
-    else
-    {
-        return 1;
-    }
-
-    xHandle = xTaskCreateStatic(TASK_SecTask,
-                                "SecTask",
-                                200,
-                                NULL,
-                                (configMAX_PRIORITIES - 1),
-                                xTaskSecTask_StkBuffer,
-                                &xTaskSecTask_TcbBuffer);
-    if (xHandle != NULL)
-    {
-        TaskList[TID_SecTask] = (uint32_t *)xHandle;
+        TaskTcbTbl[TID_Lcd] = (uint32_t *)xHandle;
     }
     else
     {
@@ -302,7 +135,10 @@ static u32 xQueueLcdStroage[xLcdQueueLength];
 
 static StaticQueue_t xQueueBuf[DID_Max];
 static QueueHandle_t TaskDataQueueTbl[configQUEUE_REGISTRY_SIZE];
-static List_t TaskMailBoxTbl[DID_Max];
+
+#ifdef USE_TASK_MAIL_BOX_LIST
+List_t TaskMailBoxTbl[DID_Max];
+#endif
 
 /**
  * @description: 静态创建数据队列
@@ -370,41 +206,14 @@ u8 DataQueueCreateStatic(void)
         return 1;
     }
 
+#ifdef USE_TASK_MAIL_BOX_LIST
     for (Index = 0; Index < DID_Max; Index++)
     {
         vListInitialise(&TaskMailBoxTbl[Index]);
     }
+#endif
 
     return 0;
-}
-
-/**
- * @description: 组册任务
- * @param {type} 
- * @return: 
- */
-void OS_ThreadCreate(void)
-{
-    TASK_CREATE_Uart1();
-    TASK_CREATE_Key();
-    TASK_CREATE_Led();
-    TASK_CREATE_Lcd();
-
-    /*
-    SwcGroupHandleCreateFunction(&SwcsOfCanTask);
-    SwcGroupHandleCreateFunction(&SwcsOfBswTask);
-    SwcGroupHandleCreateFunction(&SwcsOfMiscTask);
-    SwcGroupHandleCreateFunction(&SwcsOfAudioTask);
-    SwcGroupHandleCreateFunction(&SwcsOfComTask);
-    SwcGroupHandleCreateFunction(&SwcsOfSecTask);*/
-}
-
-typedef void (*TCfTaskFunc)(void);
-typedef void (*TCfHandleMsgFunc)(void *pParam, u16 Len);
-void cfThreadCreate(u8 tskId, TCfTaskFunc func, TCfHandleMsgFunc msgFunc)
-{
-    pFunc##osName = func;
-    pMsgFunc##osName = msgFunc;
 }
 
 /**
@@ -438,7 +247,7 @@ TASK(Key)
     }
 }
 
-TASK(LedTask)
+TASK(Led)
 {
     EvtBits_t EvtBit;
 
@@ -464,7 +273,7 @@ TASK(LedTask)
     }
 }
 
-TASK(LcdTask)
+TASK(Lcd)
 {
     EvtBits_t EvtBit;
 
@@ -495,7 +304,7 @@ TASK(LcdTask)
  * @param {type} 
  * @return: 返回一个句柄，通过该句柄可以引用新的信号量
  */
-uint32_t SemphrCreateStatic(void)
+u8 SemphrCreateStatic(void)
 {
     //#if (MAX_SEM_AND_MTX_NUM > 0)
     SemaphoreHandle_t xSemaphore = NULL;

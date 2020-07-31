@@ -1,5 +1,13 @@
+/*
+ * @Author: your name
+ * @Date: 2020-05-29 09:49:07
+ * @LastEditTime: 2020-07-31 17:50:49
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \J0001-RTOS\APP\Codes\Lib\cychdr.c
+ */
 
-#include "osif_freertos.h"
+//#include "osif_freertos.h"
 #include "cychdr.h"
 
 typedef struct
@@ -12,9 +20,7 @@ typedef struct
 
 } CycleFrame;
 
-static CycleFrame stCycleTask[] =
-    {
-        CYCLE_TIMER_EVNET_CFG};
+static CycleFrame stCycleTask[] = {CYCLE_TIMER_EVNET_CFG};
 
 void cycleTaskInit(void)
 {
@@ -57,7 +63,7 @@ void cycleTaskTick(void)
 
             if (0 == pCycleTask->initTick)
             {
-                OSIF_EVSendTask(pCycleTask->tskId, pCycleTask->event);
+                EventSendTask(pCycleTask->tskId, pCycleTask->event);
 
                 pCycleTask->initTick = pCycleTask->periodTtick;
             }

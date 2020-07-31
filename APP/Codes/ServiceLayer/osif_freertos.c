@@ -59,7 +59,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -68,7 +67,6 @@
  * Private Functions
  ******************************************************************************/
 /* ----------------local function prototypes -------------------------------*/
-
 
 /*! @cond DRIVER_u32ERNAL_USE_ONLY */
 
@@ -87,14 +85,13 @@
 static inline bool osif_IsIsrContext(void)
 {
     bool is_isr = false;
-    u32 ipsr_code = (u32)( (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) >> SCB_ICSR_VECTACTIVE_Pos );
+    u32 ipsr_code = (u32)((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) >> SCB_ICSR_VECTACTIVE_Pos);
     if (ipsr_code != 0u)
     {
         is_isr = true;
     }
 
     return is_isr;
-
 }
 #elif FEATURE_OSIF_FREERTOS_ISR_CONTEXT_METHOD == 2
 /* PowerPC device, for FreeRTOS 9.0.0 read the SPRG0 reg that denotes the u32errupt nesting level */
@@ -107,7 +104,7 @@ static inline bool osif_IsIsrContext(void)
     return 1;
 }
 #else
-    #error "No method to check ISR Context"
+#error "No method to check ISR Context"
 #endif /* FEATURE_OSIF_FREERTOS_ISR_CONTEXT_METHOD */
 /*! @endcond */
 
@@ -116,21 +113,20 @@ static inline bool osif_IsIsrContext(void)
  ******************************************************************************/
 u32 OSIF_Init(void)
 {
-	u32 RetVal = 0;
+    u32 RetVal = 0;
 
+    RetVal = TasksCreateStatic(); //创建任务
+    if (RetVal == 0)
+    {
+        RetVal = DataQueueCreateStatic(); //创建队列
+    }
 
-	RetVal = TasksCreateStatic();//创建任务
-	if(RetVal == 0)
-	{
-		RetVal = DataQueueCreateStatic();//创建队列
-	}
+    if (RetVal == 0)
+    {
+        RetVal = SemphrCreateStatic(); //创建信号量
+    }
 
-	if(RetVal == 0)
-	{
-		RetVal = SemphrCreateStatic();//创建信号量
-	}
-
-	return RetVal;
+    return RetVal;
 }
 
 /*FUNCTION**********************************************************************
@@ -148,7 +144,6 @@ void OSIF_TimeDelay(u32 delay)
     vTaskDelay(MSEC_TO_TICK(delay));
 }
 
-
 /*FUNCTION**********************************************************************
  *
  * Function Name : OSIF_GetMilliseconds
@@ -164,7 +159,7 @@ u32 OSIF_GetMilliseconds(void)
      * Note: if configTICK_RATE_HZ is less than 1000, the return value will be truncated
      * to 32-bit wide for large values of the tick count.
      */
-    return (u32)((((u64) xTaskGetTickCount()) * 1000u) / configTICK_RATE_HZ);
+    return (u32)((((u64)xTaskGetTickCount()) * 1000u) / configTICK_RATE_HZ);
 }
 
 /*FUNCTION**********************************************************************
@@ -181,12 +176,11 @@ u32 OSIF_MutexLock(u8 MutexId, const u32 timeout)
     TaskHandle_t mutex_holder_handle;
     TaskHandle_t current_task_handle;
     BaseType_t operation_status = pdFAIL;
-    mutex_t * pMutex;
+    mutex_t *pMutex;
 
-
-    if(MutexId > FREERTOS_MAX_SEM_AND_MTX_NUM)
+    if (MutexId > FREERTOS_MAX_SEM_AND_MTX_NUM)
     {
-        osif_ret_code =  1;
+        osif_ret_code = 1;
     }
     else
     {
@@ -244,12 +238,11 @@ u32 OSIF_MutexUnlock(u8 MutexId)
     TaskHandle_t mutex_holder_handle;
     TaskHandle_t current_task_handle;
     BaseType_t operation_status = pdFAIL;
-    mutex_t * pMutex;
+    mutex_t *pMutex;
 
-
-    if(MutexId > FREERTOS_MAX_SEM_AND_MTX_NUM)
+    if (MutexId > FREERTOS_MAX_SEM_AND_MTX_NUM)
     {
-        osif_ret_code =  1;
+        osif_ret_code = 1;
     }
     else
     {
@@ -340,12 +333,11 @@ u32 OSIF_SemaWait(const u8 SemId, const u32 timeout)
     u32 timeoutTicks;
     BaseType_t operation_status;
     u32 osif_ret_code;
-    semaphore_t * pSem;
+    semaphore_t *pSem;
 
-
-    if(SemId > FREERTOS_MAX_SEM_AND_MTX_NUM)
+    if (SemId > FREERTOS_MAX_SEM_AND_MTX_NUM)
     {
-        osif_ret_code =  1;
+        osif_ret_code = 1;
     }
     else
     {
@@ -380,13 +372,12 @@ u32 OSIF_SemaPost(const u8 SemId)
 {
     BaseType_t operation_status = pdFAIL;
     u32 osif_ret_code;
-    semaphore_t * pSem;
+    semaphore_t *pSem;
     bool is_isr;
 
-
-    if(SemId > FREERTOS_MAX_SEM_AND_MTX_NUM)
+    if (SemId > FREERTOS_MAX_SEM_AND_MTX_NUM)
     {
-        osif_ret_code =  1;
+        osif_ret_code = 1;
     }
     else
     {
@@ -460,7 +451,7 @@ u32 OSIF_SemaDestroy(const semaphore_t * const pSem)
 }
 #endif
 
-u8  OSIF_GetMailboxPool(u8 tskId)
+u8 OSIF_GetMailboxPool(u8 tskId)
 {
     return (tskId);
 }
@@ -471,16 +462,15 @@ u32 OSIF_ActivateTsk(u8 tskId)
     bool is_isr;
     u32 osif_ret_code = 0;
 
-
-    if(tskId > FREERTOS_MAX_TASK_NUM)
+    if (tskId > FREERTOS_MAX_TASK_NUM)
     {
-        osif_ret_code =  1;
+        osif_ret_code = 1;
     }
     else
     {
         //xHandle = xTaskGetCurrentTaskHandle();
         xHandle = TaskTcbTbl[tskId];
-        if(xHandle != NULL)
+        if (xHandle != NULL)
         {
             /* Check if the post operation is executed from ISR context */
             is_isr = osif_IsIsrContext();
@@ -488,7 +478,6 @@ u32 OSIF_ActivateTsk(u8 tskId)
             {
                 /* Execution from exception handler (ISR) */
                 portBASE_TYPE xYieldRequired;
-
 
                 xYieldRequired = xTaskResumeFromISR(xHandle);
                 if (xYieldRequired == pdPASS)
@@ -516,22 +505,21 @@ u32 OSIF_TerminateTsk(u8 tskId)
     TaskHandle_t xHandle = NULL;
     u32 osif_ret_code = 0;
 
-
-    if(tskId > FREERTOS_MAX_TASK_NUM)
+    if (tskId > FREERTOS_MAX_TASK_NUM)
     {
-        osif_ret_code =  1;
+        osif_ret_code = 1;
     }
     else
     {
         //xHandle = xTaskGetCurrentTaskHandle();
         xHandle = TaskTcbTbl[tskId];
-        if(xHandle != NULL)
+        if (xHandle != NULL)
         {
             vTaskSuspend(xHandle);
         }
         else
         {
-            osif_ret_code =  1;
+            osif_ret_code = 1;
         }
     }
 
@@ -543,17 +531,16 @@ u8 OSIF_GetActiveTask(void)
     TaskHandle_t xHandle = NULL;
     u8 TaskIdCnt = 0;
 
-
     xHandle = xTaskGetCurrentTaskHandle();
-    for(TaskIdCnt = 1; TaskIdCnt < FREERTOS_MAX_TASK_NUM; TaskIdCnt++)
+    for (TaskIdCnt = 1; TaskIdCnt < FREERTOS_MAX_TASK_NUM; TaskIdCnt++)
     {
-        if(TaskTcbTbl[TaskIdCnt] == xHandle)
+        if (TaskTcbTbl[TaskIdCnt] == xHandle)
         {
             break;
         }
     }
 
-    if(TaskIdCnt == FREERTOS_MAX_TASK_NUM)
+    if (TaskIdCnt == FREERTOS_MAX_TASK_NUM)
     {
         TaskIdCnt = 0xff;
     }
@@ -570,7 +557,6 @@ u8 OSIF_GetActiveTask(void)
  *END**************************************************************************/
 void OSIF_EventPoolInit(void)
 {
-
 }
 
 u32 OSIF_EVSendTask(u8 tskId, s32 event)
@@ -581,20 +567,19 @@ u32 OSIF_EVSendTask(u8 tskId, s32 event)
     QueueHandle_t xQueue;
     BaseType_t xYieldRequired;
 
-
-    if(tskId > FREERTOS_MAX_TASK_NUM)
+    if (tskId > FREERTOS_MAX_TASK_NUM)
     {
         RetVal = 2;
     }
 
     xQueue = TaskDataQueueTbl[tskId];
-    if(xQueue != NULL)
+    if (xQueue != NULL)
     {
         is_isr = osif_IsIsrContext();
         if (is_isr)
         {
             xYieldRequired = xQueueSendFromISR(xQueue, (void *)&event, &xHigherPriorityTaskWoken);
-            if(xHigherPriorityTaskWoken )
+            if (xHigherPriorityTaskWoken)
             {
                 // Actual macro used here is port specific.
                 portYIELD_FROM_ISR(xYieldRequired);
@@ -616,14 +601,13 @@ u32 OSIF_EVSendTask(u8 tskId, s32 event)
 u32 OSIF_WaitEvent(u32 inEvents, u32 timeout)
 {
     u32 singal = 0;
-    u8  tskId;
+    u8 tskId;
     BaseType_t RetVal = pdPASS;
     QueueHandle_t xQueue = NULL;
 
-
     tskId = OSIF_GetActiveTask();
     xQueue = TaskDataQueueTbl[tskId];
-    if(xQueue != NULL)
+    if (xQueue != NULL)
     {
         if (timeout == OS_DONOTWAIT)
         {
@@ -631,19 +615,19 @@ u32 OSIF_WaitEvent(u32 inEvents, u32 timeout)
         }
         else
         {
-            if(timeout == OS_WAITFOREVER)
+            if (timeout == OS_WAITFOREVER)
             {
                 RetVal = xQueueReceive(xQueue, (u32 *)&singal, portMAX_DELAY);
             }
             else
             {
-                RetVal = xQueueReceive(xQueue, (u32 *)&singal, (TickType_t )timeout);
+                RetVal = xQueueReceive(xQueue, (u32 *)&singal, (TickType_t)timeout);
             }
         }
 
-        if(pdPASS == RetVal)
+        if (pdPASS == RetVal)
         {
-            if((inEvents | EVENT_GLOBAL_MAILBOX) & singal)
+            if ((inEvents | EVENT_GLOBAL_MAILBOX) & singal)
             {
                 //return events;
             }
@@ -659,13 +643,12 @@ u32 OSIF_WaitEvent(u32 inEvents, u32 timeout)
     }
     else
     {
-
     }
 
     return (singal);
 }
 
-static u32 OSIF_SendMailboxInternal(u8 mbid, SMP_MSG* mb_msg)
+static u32 OSIF_SendMailboxInternal(u8 mbid, SMP_MSG *mb_msg)
 {
     u32 RetVal = 0;
     bool is_isr;
@@ -673,20 +656,19 @@ static u32 OSIF_SendMailboxInternal(u8 mbid, SMP_MSG* mb_msg)
     QueueHandle_t xQueue;
     BaseType_t xYieldRequired;
 
-
-    if(mbid > FREERTOS_MAX_TASK_NUM)
+    if (mbid > FREERTOS_MAX_TASK_NUM)
     {
         RetVal = 1;
     }
 
-    xQueue = TaskMailBoxTbl[mbid];
-    if(xQueue != NULL)
+    xQueue = TaskDataQueueTbl[mbid];
+    if (xQueue != NULL)
     {
         is_isr = osif_IsIsrContext();
         if (is_isr)
         {
             xYieldRequired = xQueueSendFromISR(xQueue, (void *)&mb_msg, &xHigherPriorityTaskWoken);
-            if(xHigherPriorityTaskWoken )
+            if (xHigherPriorityTaskWoken)
             {
                 // Actual macro used here is port specific.
                 portYIELD_FROM_ISR(xYieldRequired);
@@ -716,9 +698,8 @@ s32 OS_ReceiveMailboxInternal(u8 mbid, SMP_MSG **mb_msg, u32 timeout)
     BaseType_t RetVal = pdPASS;
     QueueHandle_t xQueue = NULL;
 
-
     xQueue = TaskDataQueueTbl[mbid];
-    if(xQueue != NULL)
+    if (xQueue != NULL)
     {
         if (timeout == OS_DONOTWAIT)
         {
@@ -726,17 +707,17 @@ s32 OS_ReceiveMailboxInternal(u8 mbid, SMP_MSG **mb_msg, u32 timeout)
         }
         else
         {
-            if(timeout == OS_WAITFOREVER)
+            if (timeout == OS_WAITFOREVER)
             {
                 RetVal = xQueueReceive(xQueue, (u32 *)&mb_msg, portMAX_DELAY);
             }
             else
             {
-                RetVal = xQueueReceive(xQueue, (u32 *)&mb_msg, (TickType_t )timeout);
+                RetVal = xQueueReceive(xQueue, (u32 *)&mb_msg, (TickType_t)timeout);
             }
         }
 
-        if(pdPASS != RetVal)
+        if (pdPASS != RetVal)
         {
             mb_msg = NULL;
             RetVal = 1;
@@ -748,31 +729,29 @@ s32 OS_ReceiveMailboxInternal(u8 mbid, SMP_MSG **mb_msg, u32 timeout)
     }
     else
     {
-
     }
 
     return (RetVal);
 }
 
-u32 OSIF_SendMailbox(u8 mbid, u8* pcMsg, u16 u16MsgLen)
+u32 OSIF_SendMailbox(u8 mbid, u8 *pcMsg, u16 u16MsgLen)
 {
     u32 RetVal = 0;
-    SMP_MSG* mqMsg = NULL;
+    SMP_MSG *mqMsg = NULL;
     u8 *pData = NULL;
     u16 MemoryLen;
     bool is_isr;
 
-
-    if((NULL != pcMsg) && (u16MsgLen > 0))
+    if ((NULL != pcMsg) && (u16MsgLen > 0))
     {
         is_isr = osif_IsIsrContext();
-        if(is_isr == 0)
+        if (is_isr == 0)
         {
             MemoryLen = (u16MsgLen + 3) & 0xfffc;
             MemoryLen = MemoryLen + sizeof(SMP_MSG);
 
-			pData = pvPortMalloc(MemoryLen);
-            if(pData != NULL)
+            pData = pvPortMalloc(MemoryLen);
+            if (pData != NULL)
             {
                 mqMsg = (SMP_MSG *)pData;
                 mqMsg->datalen = u16MsgLen;
@@ -781,7 +760,7 @@ u32 OSIF_SendMailbox(u8 mbid, u8* pcMsg, u16 u16MsgLen)
                 memcpy(pData, pcMsg, u16MsgLen);
 
                 RetVal = OSIF_SendMailboxInternal(mbid, mqMsg);
-                if(RetVal != 0)
+                if (RetVal != 0)
                 {
                     vPortFree(pData);
                 }
@@ -793,7 +772,7 @@ u32 OSIF_SendMailbox(u8 mbid, u8* pcMsg, u16 u16MsgLen)
         }
         else
         {
-			RetVal = 2;
+            RetVal = 2;
         }
     }
     else
@@ -816,11 +795,10 @@ u32 OSIF_ReceiveMailbox(u8 mbid, u8 **pBuf, u16 *pBufLen, u32 timeout)
     SMP_MSG *mqMsg;
     u8 *pData = NULL;
 
-
-    if((NULL != pBuf) && (pBufLen != NULL))
+    if ((NULL != pBuf) && (pBufLen != NULL))
     {
         RetVal = OS_ReceiveMailboxInternal((u8)mbid, &mqMsg, (u32)timeout);
-        if(0 == RetVal)
+        if (0 == RetVal)
         {
             pData = (u8 *)mqMsg;
             pData += sizeof(SMP_MSG);
@@ -844,26 +822,25 @@ u32 OSIF_MQSend(u8 tskId, u8 *pcMsg, u16 u16MsgLen)
     u8 mbxId;
     bool is_isr;
 
-
-    if((tskId <= FREERTOS_MAX_TASK_NUM) && (NULL != pcMsg) && (u16MsgLen > 0))
+    if ((tskId <= FREERTOS_MAX_TASK_NUM) && (NULL != pcMsg) && (u16MsgLen > 0))
     {
         is_isr = osif_IsIsrContext();
-        if(is_isr == 1)
-		{
-			RetVal = 1;
-		}
-		else
-		{
-			mbxId = tskId;
-			if(0 == OSIF_SendMailbox(mbxId, pcMsg, u16MsgLen))
-			{
-				OSIF_EVSendTask(tskId, EVENT_GLOBAL_MAILBOX);
-			}
-			else
-			{
-				RetVal = 2;
-			}
-		}
+        if (is_isr == 1)
+        {
+            RetVal = 1;
+        }
+        else
+        {
+            mbxId = tskId;
+            if (0 == OSIF_SendMailbox(mbxId, pcMsg, u16MsgLen))
+            {
+                OSIF_EVSendTask(tskId, EVENT_GLOBAL_MAILBOX);
+            }
+            else
+            {
+                RetVal = 2;
+            }
+        }
     }
     else
     {
@@ -875,7 +852,6 @@ u32 OSIF_MQSend(u8 tskId, u8 *pcMsg, u16 u16MsgLen)
 
 void OS_HOOK_ErrorHook(u8 State, u8 ServiceId, u8 ID)
 {
-
 }
 
 /*******************************************************************************

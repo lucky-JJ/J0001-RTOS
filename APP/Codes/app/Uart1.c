@@ -1,23 +1,24 @@
 /*
  * @Author: your name
  * @Date: 2020-05-29 09:49:07
- * @LastEditTime: 2020-07-30 18:09:14
+ * @LastEditTime: 2020-07-31 17:52:28
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \APP\Codes\app\Uart1.c
  */
-#include "osal.h"
+//#include "osal.h"
 //#include "osif_freertos.h"
-#include "app.h"
-#include "sys.h"
+//#include "app.h"
+//#include "sys.h"
 #include "Os.h"
 
 #include "EventDefine.h"
 #include "cychdr.h"
 #include "usart.h"
 #include "MsgDefine.h"
+#include "ResourceConfig.h"
 
-s32 SendMsgToUart1Manage(u8 *MsgBuff, u16 MsgLen)
+s32 SendMsgToUart1(u8 *MsgBuff, u16 MsgLen)
 {
     u32 ret = 0;
 
@@ -25,7 +26,7 @@ s32 SendMsgToUart1Manage(u8 *MsgBuff, u16 MsgLen)
     return ret;
 }
 
-void Uart1_MsgHandle(void *pbuf, u16 buflen)
+static void Uart1_MsgHandle(void *pbuf, u16 buflen)
 {
     /* 消息内容都是从邮箱取的 */
 
@@ -46,40 +47,8 @@ void Uart1_MsgHandle(void *pbuf, u16 buflen)
     }
 }
 
-void Uart1Manage_Func(void)
-{
-    u32 tSignals;
-
-    /* wait for events indefinitely and clear after end of function */
-    tSignals = cfThreadWaitWithTimeout((EVENT_GLOBAL_Watchdog |
-                                        EVENT_Uart1_TIMER_5MS_EVENT),
-                                       OS_WAITFOREVER);
-
-    if (tSignals & EVENT_TIMER_5MS)
-    {
-        USART1_ManageProc(10);
-    }
-    if (tSignals & EVENT_Uart1_TX_FINISH)
-    {
-        USART1_SendDataManage();
-    }
-    else if (tSignals & EVENT_GLOBAL_Watchdog)
-    {
-        ;
-    }
-}
-
 /**
- * @description: 子任务主函数
- * @param {type} 
- * @return: 
- */
-TASK_MAIN(Uart1)
-{
-}
-
-/**
- * @description: 子任务接收其他任务消息处理函数
+ * @description: 接收其他任务消息处理函数
  * @param {type} 
  * @return: 
  */
@@ -104,51 +73,54 @@ TASK_MSG_HANDLE(Uart1)
     }
 }
 
+/**
+ * @description: 子任务主函数
+ * @param {type} 
+ * @return: 
+ */
+TASK_MAIN(Uart1)
+{
+    EvtBits_t EvtBit;
+
+    for (;;)
+    {
+        EvtBit = EvtGroupsWaitBits(TASK_NAME(Uart1),
+                                   (EVENT_GLOBAL_MAILBOX | EVENT_GLOBAL_Watchdog |
+                                    EVENT_GLOBAL_TIMER_5MS | EVENT_GLOBAL_TIMER_10MS));
+
+        if (EvtBit & EVENT_GLOBAL_MAILBOX)
+        {
+            TASK_MSG_HANDLE_Uart1();
+        }
+        else if (EvtBit & EVENT_GLOBAL_TIMER_5MS)
+        {
+            USART1_ManageProc(5);
+        }
+        else if (EvtBit & EVENT_GLOBAL_TIMER_10MS)
+        {
+        }
+        else if (EvtBit & EVENT_GLOBAL_Watchdog)
+        {
+        }
+        else
+        {
+        }
+    }
+}
+
 TASK_INIT(Uart1)
 {
 
     uart1_init(Uart1_TxIntHandle, Uart1_RxIntHandle);
 
-    //enableCycleEvent((TASK_NAME(Uart1)));
-}
-
-TASK_CREATE(Uart1)
-{
-    cfThreadCreate(TASK_NAME(Uart1), Uart1Manage_Func, Uart1Manage_MsgHandle);
+    enableCycleEvent(TASK_NAME(Uart1));
 }
 
 /* TASK Function */
 TASK(Uart1)
 {
-    /*
-    先初始化 , 在循环
-    */
+    /*先初始化 , 在循环*/
     TASK_INIT_Uart1();
 
-    EvtBits_t EvtBit;
-
-    //SwcGroupHandleInitFunction(&SwcsOfCanTask);
-    //MessageReadyListInit(&TaskMsgReadyList[TASK_NAME(UartTask)][0], MESSAGE_LIST_SIZE(COM_RECEIVE_MESSAGE_COUNT, 32));
-
-    for (;;)
-    {
-        EvtBit = EvtGroupsWaitBits(TASK_NAME(Uart),
-                                   (EVENT_GLOBAL_MAILBOX | EVENT_GLOBAL_Watchdog |
-                                    EVT_ID_All_Task_TIMER_5MS));
-
-        if (EvtBit & EVENT_GLOBAL_MAILBOX)
-        {
-            //SwcGroupHandleMessage(&SwcsOfCanTask, TASK_NAME(UartTask));
-            TASK_MSG_HANDLE_Uart1();
-        }
-        else if (EvtBit & EVT_ID_All_Task_TIMER_5MS)
-        {
-            //SwcGroupHandleMainFunction(&SwcsOfCanTask, 5);
-            TASK_MAIN_Uart1();
-        }
-        else
-        {
-            //SwcGroupHandleEvent(&SwcsOfCanTask, EvtBit);
-        }
-    }
+    TASK_MAIN_Uart1();
 }

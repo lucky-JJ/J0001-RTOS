@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-7-28 10:09:39
- * @LastEditTime: 2020-07-29 09:42:43
+ * @LastEditTime: 2020-07-31 17:47:57
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \APP\Codes\ServiceLayer\osal.h
@@ -14,7 +14,7 @@
 //#include "OSIF.h"
 #include "sys.h"
 
-#define TASK_NAME(name) (TID_##name)
+//#define TASK_NAME(name) (TID_##name)
 
 #define MAIN_LOOP \
     for (;;)      \
