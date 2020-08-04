@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-05-29 09:49:07
- * @LastEditTime: 2020-07-31 18:05:17
+ * @LastEditTime: 2020-08-03 17:43:19
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \APP\Codes\System\Stattup\main.c
@@ -22,6 +22,7 @@
 
 #include "Os.h"
 #include "Irq.h"
+#include "ResourceConfig.h"
 
 /*
 	设计3个任务 .

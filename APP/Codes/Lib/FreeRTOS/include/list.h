@@ -191,7 +191,7 @@ use of FreeRTOS.*/
 struct xLIST_ITEM
 {
 	listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE			/*< 用于检测列表项数据是否完整 /Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-	configLIST_VOLATILE TickType_t xItemValue;			/*< 列表项的值 /The value being listed.  In most cases this is used to sort the list in descending order. */
+	configLIST_VOLATILE TickType_t xItemValue;			/*< 列表项的值,供列表排序用 /The value being listed.  In most cases this is used to sort the list in descending order. */
 	struct xLIST_ITEM * configLIST_VOLATILE pxNext;		/*< 指向列表中下一个链表项 /Pointer to the next ListItem_t in the list. */
 	struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;	/*< 指向列表中上一个链表项 /Pointer to the previous ListItem_t in the list. */
 	void * pvOwner;										/*< 指向一个任务TCB /Pointer to the object (normally a TCB) that contains the list item.  There is therefore a two way link between the object containing the list item and the list item itself. */
@@ -215,9 +215,9 @@ typedef struct xMINI_LIST_ITEM MiniListItem_t;
 typedef struct xLIST
 {
 	listFIRST_LIST_INTEGRITY_CHECK_VALUE				/*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-	configLIST_VOLATILE UBaseType_t uxNumberOfItems;	/* 表示该列表中挂接的列表项数目 */
-	ListItem_t * configLIST_VOLATILE pxIndex;			/*< 用于遍历列表 /Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
-	MiniListItem_t xListEnd;							/*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
+	configLIST_VOLATILE UBaseType_t uxNumberOfItems;	/* 表示该链表中节点数目 */
+	ListItem_t * configLIST_VOLATILE pxIndex;			/*< 用于遍历链表 /Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
+	MiniListItem_t xListEnd;							/*< 包含最大可能项值的列表项，这意味着它始终位于列表的末尾，因此用作标记 List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
 	listSECOND_LIST_INTEGRITY_CHECK_VALUE				/*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 } List_t;
 

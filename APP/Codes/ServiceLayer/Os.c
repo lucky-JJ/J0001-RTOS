@@ -1,13 +1,15 @@
 /*
  * @Author: your name
  * @Date: 2020-07-28 09:50:44
- * @LastEditTime: 2020-07-31 18:05:52
+ * @LastEditTime: 2020-08-03 16:36:35
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \J0001-RTOS\APP\Codes\ServiceLayer\Os.c
  */
+#include <string.h>
 #include "Os.h"
 #include "ResourceConfig.h"
+#include "cychdr.h"
 
 #define MSEC_TO_TICK(msec) (pdMS_TO_TICKS(msec))
 
@@ -108,16 +110,6 @@ uint32_t EvtGroupsWaitBits(const unsigned char TaskId, const uint32_t BitsToWait
     return Bits;
 }
 
-/**
- * @description: OS 定时器回调函数,1ms一次
- * @param {type} 
- * @return: 
- */
-void vApplicationTickHook(void)
-{
-    Alarm_Counter(1);
-}
-
 void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName)
 {
     (void)pcTaskName;
@@ -185,7 +177,7 @@ the stack and so not exists after this function exits. */
     *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
 }
 
-uint8_t EventSendTask(unsigned char Taskid, uint32_t Event)
+uint8_t Os_EventSendTask(unsigned char Taskid, uint32_t Event)
 {
     uint8_t Ret = 0;
 
@@ -193,7 +185,7 @@ uint8_t EventSendTask(unsigned char Taskid, uint32_t Event)
     return Ret;
 }
 
-uint8_t EventSendTaskFormISR(unsigned char Taskid, uint32_t Event)
+uint8_t Os_EventSendTaskFormISR(unsigned char Taskid, uint32_t Event)
 {
     uint8_t Ret = 0;
 
@@ -214,7 +206,7 @@ u32 Os_MtxLock(u8 MutexId, const u32 timeout)
     BaseType_t operation_status = pdFAIL;
     mutex_t *pMutex;
 
-    if (MutexId > MAX_SEM_AND_MTX_NUM)
+    if (MutexId > SID_Max)
     {
         osif_ret_code = 1;
     }
@@ -273,7 +265,7 @@ u32 Os_MtxUnlock(u8 MutexId)
     BaseType_t operation_status = pdFAIL;
     mutex_t *pMutex;
 
-    if (MutexId > MAX_SEM_AND_MTX_NUM)
+    if (MutexId > SID_Max)
     {
         osif_ret_code = 1;
     }
@@ -311,7 +303,7 @@ u32 Os_SemWait(const u8 SemId, const u32 timeout)
     u32 osif_ret_code;
     semaphore_t *pSem;
 
-    if (SemId > MAX_SEM_AND_MTX_NUM)
+    if (SemId > SID_Max)
     {
         osif_ret_code = 1;
     }
@@ -349,7 +341,7 @@ u32 Os_SemPost(const u8 SemId)
     semaphore_t *pSem;
     bool is_isr;
 
-    if (SemId > MAX_SEM_AND_MTX_NUM)
+    if (SemId > SID_Max)
     {
         osif_ret_code = 1;
     }
@@ -667,7 +659,7 @@ u32 OS_MQSend(u8 tskId, u8 *pcMsg, u16 u16MsgLen)
             mbxId = tskId;
             if (0 == OS_SendMailbox(mbxId, pcMsg, u16MsgLen))
             {
-                EventSendTask(tskId, EVENT_GLOBAL_MAILBOX);
+                Os_EventSendTask(tskId, EVENT_GLOBAL_MAILBOX);
             }
             else
             {
@@ -685,6 +677,36 @@ u32 OS_MQSend(u8 tskId, u8 *pcMsg, u16 u16MsgLen)
 
 void OS_FreeMailBoxMemory(void *pBuf)
 {
+#ifdef USE_TASK_MAIL_BOX_LIST
+    u8 Index;
+    List_t *pList;
+    ListItem_t *pxIterator;
+    SMP_MSG *mqMsg;
+
+    for (Index = 0; Index < TID_Max; Index++)
+    {
+        pList = &TaskMailBoxTbl[Index];
+
+        if (pList != NULL)
+        {
+
+            if (listLIST_IS_EMPTY(pList))
+            {
+                ;
+            }
+            else
+            {
+                pxIterator = (ListItem_t *)&(pList->xListEnd);
+                while (pList->uxNumberOfItems)
+                {
+                    mqMsg = (SMP_MSG *)pxIterator->pxNext->xItemValue;
+                    uxListRemove(&(mqMsg->Item));
+                    vPortFree(mqMsg);
+                }
+            }
+        }
+    }
+#else
     SMP_MSG *mqMsg = NULL;
     pBuf = pBuf - sizeof(SMP_MSG);
     mqMsg = (SMP_MSG *)pBuf;
@@ -694,27 +716,7 @@ void OS_FreeMailBoxMemory(void *pBuf)
     (void)xTaskResumeAll();
 
     vPortFree(pBuf);
-}
-
-/**
- * Initialization of kernel structures and start of the first
- * task.
- */
-void InitOS(void)
-{
-    __disable_irq();
-    /* event group init */
-    /* sem create init */
-    SemphrCreateStatic();
-    /* queue create init */
-    DataQueueCreateStatic();
-    /* mutex create init */
-    TasksStaticCreate();
-    /*alarm init*/
-    //Alarm_Init();
-
-    __enable_irq();
-    // Now all tasks should be created.
+#endif
 }
 
 void StartOS(void)

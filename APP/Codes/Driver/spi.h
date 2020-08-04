@@ -2,8 +2,7 @@
 #define __SPI_H
 #include "sys.h"
 
-
-extern SPI_HandleTypeDef SPI5_Handler;  //SPI¾ä±ú
+extern SPI_HandleTypeDef SPI5_Handler; //SPIå¥æŸ„
 
 void SPI5_Init(void);
 void SPI5_SetSpeed(u8 SPI_BaudRatePrescaler);

@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-05-29 09:49:07
- * @LastEditTime: 2020-07-31 17:52:28
+ * @LastEditTime: 2020-08-04 09:35:18
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \APP\Codes\app\Uart1.c
@@ -12,11 +12,13 @@
 //#include "sys.h"
 #include "Os.h"
 
-#include "EventDefine.h"
+//#include "EventDefine.h"
 #include "cychdr.h"
 #include "usart.h"
 #include "MsgDefine.h"
 #include "ResourceConfig.h"
+
+#include "usart.h"
 
 s32 SendMsgToUart1(u8 *MsgBuff, u16 MsgLen)
 {
@@ -40,7 +42,7 @@ static void Uart1_MsgHandle(void *pbuf, u16 buflen)
         {
         case EVENT_SEND_DATA_TO_UART1:
         {
-            CommCmdDataCoderAndSend(pMsg_t);
+            //CommCmdDataCoderAndSend(pMsg_t);
             break;
         }
         }
@@ -56,20 +58,17 @@ TASK_MSG_HANDLE(Uart1)
 {
     /*从邮箱去取数据*/
 
-    u8 tskId;
     u16 BufLen;
     u8 *pBuf = NULL;
+    //TaskHandle_t xHandle = NULL;
 
-    tskId = xTaskGetCurrentTaskHandle();
-
-    if (0 == OS_ReceiveMailbox(tskId, &pBuf, &BufLen, OS_DONOTWAIT))
+    if (TaskList[TID_Uart1] == xTaskGetCurrentTaskHandle())
     {
-        if (tskId == TID_Uart1)
+        if (0 == OS_ReceiveMailbox(TID_Uart1, &pBuf, &BufLen, OS_DONOTWAIT))
         {
             Uart1_MsgHandle(pBuf, BufLen);
+            OS_FreeMailBoxMemory(pBuf);
         }
-
-        OS_FreeMailBoxMemory(pBuf);
     }
 }
 

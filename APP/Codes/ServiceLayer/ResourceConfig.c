@@ -1,16 +1,18 @@
-#include "Os.h"
+
 //#include "Alarm.h"
 #include "ResourceConfig.h"
 #include <stdio.h>
-#include "queue.h"
+////#include "queue.h"
 #include "list.h"
-
+#include "Irq.h"
+//#include "FreeRTOS.h"
+//#include "task.h"
 /* Message id bit table of every task   */
-uint32_t TaskMsgReadyList[TASK_NUM][MESSAGE_LIST_SIZE(COM_RECEIVE_MESSAGE_COUNT, 32)];
-uint32_t TaskMsgCnt[TASK_NUM][2];
-uint32_t *TaskList[TASK_NUM];
+//uint32_t TaskMsgReadyList[TASK_NUM][MESSAGE_LIST_SIZE(COM_RECEIVE_MESSAGE_COUNT, 32)];
+//uint32_t TaskMsgCnt[TASK_NUM][2];
+//uint32_t *TaskList[TASK_NUM];
 //#if (MAX_SEM_AND_MTX_NUM > 0)
-SemaphoreHandle_t SemphrTbl[MAX_SEM_AND_MTX_NUM];
+SemaphoreHandle_t SemphrTbl[SID_Max];
 //#endif
 
 static StaticSemaphore_t xSemaphore_RtcMutex_buf;
@@ -27,7 +29,8 @@ extern void TASK_Lcd(void *pvParameters);
 /* Task stk&tcb Buffer */
 
 //任务句柄
-static TaskHandle_t TaskTcbTbl[TID_Max];
+TaskHandle_t TaskTcbTbl[TID_Max];
+uint32_t *TaskList[TID_Max];
 
 //任务堆栈大小
 #define xTaskUartTask_STK_SIZE 200
@@ -47,6 +50,9 @@ static StaticTask_t xTaskKeyTask_TcbBuffer;
 static StaticTask_t xTaskLedTask_TcbBuffer;
 static StaticTask_t xTaskLcdTask_TcbBuffer;
 
+
+
+
 /**
  * @description: 静态创建任务
  * @param {type} 
@@ -65,7 +71,9 @@ u8 TasksStaticCreate(void)
                                 &xTaskUartTask_TcbBuffer);  //任务控制块
     if (xHandle != NULL)
     {
-        TaskTcbTbl[TID_Uart1] = (uint32_t *)xHandle;
+        //TaskTcbTbl[TID_Uart1] = (uint32_t *)xHandle;
+        TaskList[TID_Uart1] = (uint32_t *)xHandle;
+
     }
     else
     {
@@ -81,14 +89,14 @@ u8 TasksStaticCreate(void)
                                 &xTaskKeyTask_TcbBuffer);
     if (xHandle != NULL)
     {
-        TaskTcbTbl[TID_Key] = (uint32_t *)xHandle;
+        TaskList[TID_Key] = (uint32_t *)xHandle;
     }
     else
     {
         return 1;
     }
 
-    xHandle = xTaskCreateStatic(TASK_LedTask,
+    xHandle = xTaskCreateStatic(TASK_Led,
                                 "LedTask",
                                 xTaskLedTask_STK_SIZE,
                                 NULL,
@@ -97,14 +105,14 @@ u8 TasksStaticCreate(void)
                                 &xTaskLedTask_TcbBuffer);
     if (xHandle != NULL)
     {
-        TaskTcbTbl[TID_Led] = (uint32_t *)xHandle;
+        TaskList[TID_Led] = (uint32_t *)xHandle;
     }
     else
     {
         return 1;
     }
 
-    xHandle = xTaskCreateStatic(TASK_LcdTask,
+    xHandle = xTaskCreateStatic(TASK_Lcd,
                                 "LcdTask",
                                 xTaskLcdTask_STK_SIZE,
                                 NULL,
@@ -113,7 +121,7 @@ u8 TasksStaticCreate(void)
                                 &xTaskLcdTask_TcbBuffer);
     if (xHandle != NULL)
     {
-        TaskTcbTbl[TID_Lcd] = (uint32_t *)xHandle;
+        TaskList[TID_Lcd] = (uint32_t *)xHandle;
     }
     else
     {
@@ -134,7 +142,7 @@ static u32 xQueueLedStroage[xLedQueueLength];
 static u32 xQueueLcdStroage[xLcdQueueLength];
 
 static StaticQueue_t xQueueBuf[DID_Max];
-static QueueHandle_t TaskDataQueueTbl[configQUEUE_REGISTRY_SIZE];
+QueueHandle_t TaskDataQueueTbl[configQUEUE_REGISTRY_SIZE];
 
 #ifdef USE_TASK_MAIL_BOX_LIST
 List_t TaskMailBoxTbl[DID_Max];
@@ -217,89 +225,6 @@ u8 DataQueueCreateStatic(void)
 }
 
 /**
- * @description: 主线任务入口
- * @param {type} 
- * @return: 
- */
-TASK(Key)
-{
-    EvtBits_t EvtBit;
-
-    SwcGroupHandleInitFunction(&SwcsOfBswTask);
-    MessageReadyListInit(&TaskMsgReadyList[TASK_NAME(KeyTask)][0], MESSAGE_LIST_SIZE(COM_RECEIVE_MESSAGE_COUNT, 32));
-    for (;;)
-    {
-        EvtBit = EvtGroupsWaitBits(TASK_NAME(KeyTask),
-                                   (EVT_ID_BswTask_COM_UPDATE | EVT_ID_BswTask_TIMER_5MS));
-
-        if (EvtBit & EVT_ID_BswTask_COM_UPDATE)
-        {
-            SwcGroupHandleMessage(&SwcsOfBswTask, TASK_NAME(KeyTask));
-        }
-        else if (EvtBit & EVT_ID_BswTask_TIMER_5MS)
-        {
-            SwcGroupHandleMainFunction(&SwcsOfBswTask, 5);
-        }
-        else
-        {
-            SwcGroupHandleEvent(&SwcsOfBswTask, EvtBit);
-        }
-    }
-}
-
-TASK(Led)
-{
-    EvtBits_t EvtBit;
-
-    SwcGroupHandleInitFunction(&SwcsOfMiscTask);
-    MessageReadyListInit(&TaskMsgReadyList[TASK_NAME(LedTask)][0], MESSAGE_LIST_SIZE(COM_RECEIVE_MESSAGE_COUNT, 32));
-    for (;;)
-    {
-        EvtBit = EvtGroupsWaitBits(TASK_NAME(LedTask),
-                                   (EVT_ID_MiscTask_COM_UPDATE | EVT_ID_MiscTask_TIMER_10MS));
-
-        if (EvtBit & EVT_ID_MiscTask_COM_UPDATE)
-        {
-            SwcGroupHandleMessage(&SwcsOfMiscTask, TASK_NAME(LedTask));
-        }
-        else if (EvtBit & EVT_ID_MiscTask_TIMER_10MS)
-        {
-            SwcGroupHandleMainFunction(&SwcsOfMiscTask, 10);
-        }
-        else
-        {
-            SwcGroupHandleEvent(&SwcsOfMiscTask, EvtBit);
-        }
-    }
-}
-
-TASK(Lcd)
-{
-    EvtBits_t EvtBit;
-
-    SwcGroupHandleInitFunction(&SwcsOfAudioTask);
-    MessageReadyListInit(&TaskMsgReadyList[TASK_NAME(LcdTask)][0], MESSAGE_LIST_SIZE(COM_RECEIVE_MESSAGE_COUNT, 32));
-    for (;;)
-    {
-        EvtBit = EvtGroupsWaitBits(TASK_NAME(LcdTask),
-                                   (EVT_ID_AudioTask_COM_UPDATE | EVT_ID_AudioTask_TIMER_10MS));
-
-        if (EvtBit & EVT_ID_AudioTask_COM_UPDATE)
-        {
-            SwcGroupHandleMessage(&SwcsOfAudioTask, TASK_NAME(LcdTask));
-        }
-        else if (EvtBit & EVT_ID_AudioTask_TIMER_10MS)
-        {
-            SwcGroupHandleMainFunction(&SwcsOfAudioTask, 10);
-        }
-        else
-        {
-            SwcGroupHandleEvent(&SwcsOfAudioTask, EvtBit);
-        }
-    }
-}
-
-/**
  * @description: 创建静态互斥信号量 / 创建静态计数信号量
  * @param {type} 
  * @return: 返回一个句柄，通过该句柄可以引用新的信号量
@@ -348,4 +273,25 @@ u8 SemphrCreateStatic(void)
 
     //#endif
     return 0;
+}
+
+/**
+ * Initialization of kernel structures and start of the first
+ * task.
+ */
+void InitOS(void)
+{
+    __disable_irq();
+    /* event group init */
+    /* sem create init */
+    SemphrCreateStatic();
+    /* queue create init */
+    DataQueueCreateStatic();
+    /* mutex create init */
+    TasksStaticCreate();
+    /*alarm init*/
+    //Alarm_Init();
+
+    __enable_irq();
+    // Now all tasks should be created.
 }

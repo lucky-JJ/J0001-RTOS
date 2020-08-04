@@ -1,13 +1,12 @@
 /*
  * @Author: your name
  * @Date: 2020-05-29 09:49:07
- * @LastEditTime: 2020-07-31 17:50:49
+ * @LastEditTime: 2020-08-04 10:17:56
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \J0001-RTOS\APP\Codes\Lib\cychdr.c
  */
 
-//#include "osif_freertos.h"
 #include "cychdr.h"
 
 typedef struct
@@ -63,7 +62,7 @@ void cycleTaskTick(void)
 
             if (0 == pCycleTask->initTick)
             {
-                EventSendTask(pCycleTask->tskId, pCycleTask->event);
+                Os_EventSendTask(pCycleTask->tskId, pCycleTask->event);
 
                 pCycleTask->initTick = pCycleTask->periodTtick;
             }
@@ -102,5 +101,21 @@ void disableCycleEvent(u8 tskId)
         {
             pCycleTask->bEnable = false;
         }
+    }
+}
+
+/**
+ * @description: OS 定时器回调函数,1ms一次
+ * @param {type} 
+ * @return: 
+ */
+void vApplicationTickHook(void)
+{
+    static u8 cnt = 0;
+
+    if (++cnt == 5)
+    {
+        cnt = 0;
+        cycleTaskTick(); /*5ms 进一次*/
     }
 }

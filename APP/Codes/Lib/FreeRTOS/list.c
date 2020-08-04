@@ -139,8 +139,8 @@ ListItem_t * const pxIndex = pxList->pxIndex;//pxIndex指向当前正在处理�
 	/* Insert a new list item into pxList, but rather than sort the list,
 	makes the new list item the last item to be removed by a call to
 	listGET_OWNER_OF_NEXT_ENTRY(). */
-	pxNewListItem->pxNext = pxIndex;//目的就是把pxList->pxIndex指向插入的链表项
-	pxNewListItem->pxPrevious = pxIndex->pxPrevious;
+	pxNewListItem->pxNext = pxIndex;//目的就是把新节点插入到当前正在处理的链表项之前
+	pxNewListItem->pxPrevious = pxIndex->pxPrevious;//当前处理的节点的前继指针替换为新插入节点
 
 	/* Only used during decision coverage testing. */
 	mtCOVERAGE_TEST_DELAY();
@@ -158,7 +158,7 @@ ListItem_t * const pxIndex = pxList->pxIndex;//pxIndex指向当前正在处理�
 void vListInsert( List_t * const pxList, ListItem_t * const pxNewListItem )
 {
 ListItem_t *pxIterator;
-const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
+const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;// 取插入排序的依据值
 
 	/* Only effective when configASSERT() is also defined, these tests may catch
 	the list data structures being overwritten in memory.  They will not catch
@@ -173,9 +173,15 @@ const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
 	stored in ready lists (all of which have the same xItemValue value) get a
 	share of the CPU.  However, if the xItemValue is the same as the back marker
 	the iteration loop below will not end.  Therefore the value is checked
-	first, and the algorithm slightly modified if necessary. */
+	first, and the algorithm slightly modified if necessary. 
+    将新的列表项插入到列表中，按xItemValue顺序排序。如果列表已经包含具有相同项值的列表项，则
+    新的列表项应该放在它的后面。这确保TCB的存储在就绪列表中(所有列表都具有相同的xItemValue值)得到
+    共享CPU。但是，如果xItemValue与后退标记相同下面的迭代循环不会结束。因此会检查该值
+    首先，如果需要，对算法稍加修改
+    */
 	if( xValueOfInsertion == portMAX_DELAY )
-	{
+	{   // 对于value 等于最大值的直接插入链表尾
+        // 避免导致下面 for 的死循环
 		pxIterator = pxList->xListEnd.pxPrevious;
 	}
 	else
@@ -201,7 +207,17 @@ const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
 			   before the scheduler has been started (are interrupts firing
 			   before vTaskStartScheduler() has been called?).
 		**********************************************************************/
-
+        // 查找合适的插入位置 从小到大排序
+        // 注意等号，如果存在相同值，后插入的在最后,
+        // 保证每个 task 都能被运行 
+                /*
+        在调试过程中如果发现程序挂死在此处，可能的情况：
+        1.stack overflow
+        2.中断优先级错误 （尤其在cotex-m系列 MCU）
+        3.进入边界(关闭所有中断)后调用可能导致挂起的API,
+            或者中断中使用没有"FrimISR"的API
+        4.在队列，信号量没有初始化或者调度器没有起来前使用它们
+        */
 		for( pxIterator = ( ListItem_t * ) &( pxList->xListEnd ); pxIterator->pxNext->xItemValue <= xValueOfInsertion; pxIterator = pxIterator->pxNext ) /*lint !e826 !e740 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
 		{
 			/* There is nothing to do here, just iterating to the wanted
@@ -215,7 +231,7 @@ const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
 	pxIterator->pxNext = pxNewListItem;
 
 	/* Remember which list the item is in.  This allows fast removal of the
-	item later. */
+	item later. 更新插入节点所属链表*/
 	pxNewListItem->pvContainer = ( void * ) pxList;
 
 	( pxList->uxNumberOfItems )++;

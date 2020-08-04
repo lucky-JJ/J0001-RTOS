@@ -1,5 +1,6 @@
 #include "usart.h"
 #include "fifo.h"
+#include "Os.h"
 
 static fifo_TypeDef Uart1_RxData_fifo;
 
@@ -10,7 +11,7 @@ UART_HandleTypeDef UART1_Handler;
 
 void Uart1_TxIntHandle(void)
 {
-    OSIF_EVSendTask(TASK_NAME(Uart1), EVENT_Uart1_TX_FINISH);
+    //Os_EventSendTask(TASK_NAME(Uart1), EVENT_Uart1_TX_FINISH);
 }
 
 void Uart1_RxIntHandle(u8 byte)
@@ -34,7 +35,7 @@ void uart1_init(void *Uart1_TxHandle, void *Uart1_RxHandle)
 
     HAL_UART_Receive_IT(&UART1_Handler); //使能接收中断和错误中断：UART_IT_RXNE
 
-    fifo_Init(&Uart1_RxData_fifo, &Uart1_RxDataBuffer[0], 256);
+    fifo_Init(&Uart1_RxData_fifo, &Uart1_RxDataBuffer[0], 512);
 }
 
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
@@ -63,7 +64,7 @@ static void USART1_RxDataParse(void)
 
     if (0 == fifo_GetFreeSpace(&Uart1_RxData_fifo))
     {
-        fifo_Init(&Uart1_RxData_fifo, Uart1_RxDataBuffer, 256);
+        fifo_Init(&Uart1_RxData_fifo, Uart1_RxDataBuffer, 512);
     }
 
     RxLength = fifo_GetLen(&Uart1_RxData_fifo);
@@ -92,14 +93,14 @@ static void USART1_RxDataParse(void)
 
 void USART1_SendDataManage(void)
 {
-    u16 len = 0;
-    u16 SendLen = 0;
+    //u16 len = 0;
+    //u16 SendLen = 0;
 
     //len = fifo_GetLen(&DispTxData_fifo);
 
-    if (len == 0)
+    //if (len == 0)
     {
-        return;
+    //    return;
     }
 
     //if (len >= DISP_CURRENT_TX_LEN)

@@ -1,5 +1,5 @@
 #include "sys.h"
-#include "task.h"
+#include "Os.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
@@ -116,37 +116,7 @@ void SysTick_Handler(void)
     HAL_IncTick();
 }
 
-/**/
 
-typedef struct
-{
-    u8 CtrlType;
-    u32 CtrlTime;
-
-} ctrl_TypeDef;
-
-ctrl_TypeDef ctrl_t;
-
-static void UpdateTimingStart(u8 ctrlType)
-{
-    g_SystemTime = HAL_GetTick();
-}
-
-static void App_UpdateCtrlCondition(u8 ctrlType)
-{
-    ctrl_t.CtrlType = ctrlType;
-    ctrl_t.CtrlTime = HAL_GetTick();
-}
-
-#define TIMER_TIME_DIFF(later, earlier) (((u32)earlier > (u32)later) ? ((0xFFFFFFFFu - (u32)earlier) + (u32)later + 1) : ((u32)later - (u32)earlier))
-
-//TIMER_TIME_DIFF(HAL_GetTick(), ctrl_t.CtrlTime)>=1000
-
-static void App_RemoteCtrlResp(u8 ucCtrlByte, u8 ucResult, u8 ucFailedCode)
-{
-    //sendmsg();
-    //App_UpdateCtrlCondition(rmt_ctrl_none);   //远程控制结清除控制
-}
 
 #ifdef USE_FULL_ASSERT
 //当编译提示出错的时候此函数用来报告错误的文件和所在行

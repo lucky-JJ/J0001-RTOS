@@ -2,14 +2,14 @@
 #define __OS_H__
 
 //#include "core_cm4.h"
-#include "FreeRTOS.h"
+
 #include "sys.h"
 //#include "FwLib.h"
 
 //#if (__CORTEX_M == 4)
 //#include "Os_Cfg.h"
 //#include "Alarm.h"
-
+#include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
@@ -101,15 +101,6 @@ typedef enum
 
 typedef Os_status_type Os_StatusType;
 
-#define TASK(TaskName) void TASK_##TaskName(void *pvParameters)
-#define TASK_NAME(name) (TID_##name)
-#define TASK_MAIN(name) void TASK_MAIN_##name(void)
-#define TASK_MSG_HANDLE(name) void TASK_MSG_HANDLE_##name(void)
-#define TASK_CREATE(name) void TASK_CREATE_##name(void)
-
-#define ALARM_NAME(name) (ALARM_ID_##name)
-#define SEM_MTX_NAME(name) (SID_##name)
-
 #define DisableOSInt()
 #define EnableOSInt()
 
@@ -117,12 +108,12 @@ typedef Os_status_type Os_StatusType;
 /* See oil config for defines */
 #define AppModeType s32
 
-extern uint32_t *TaskList[];
+//extern uint32_t *TaskList[];
 #define EvtBits_t uint32_t
 
-uint8_t EventSendTask(unsigned char Taskid, uint32_t Event);
+uint8_t Os_EventSendTask(unsigned char Taskid, uint32_t Event);
 
-uint8_t EventSendTaskFormISR(unsigned char Taskid, uint32_t Event);
+uint8_t Os_EventSendTaskFormISR(unsigned char Taskid, uint32_t Event);
 
 void OS_HOOK_ErrorHook(uint8_t State, uint8_t ServiceId, uint8_t ID);
 
@@ -144,8 +135,6 @@ u32 Os_SemPost(const u8 SemId);
 
 void Os_IsrInit(void);
 
-void InitOS(void);
-
 void StartOS(void);
 
 void ShutdownOS(u8 Error);
@@ -166,8 +155,10 @@ void SuspendAllInterrupts(void);
 
 const char *Os_GetCurTaskName(void);
 
+void OS_FreeMailBoxMemory(void *pBuf);
+
 u32 OS_ReceiveMailbox(u8 mbid, u8 **pBuf, u16 *pBufLen, u32 timeout);
 u32 OS_SendMailbox(u8 mbid, u8 *pcMsg, u16 u16MsgLen);
 u32 OS_MQSend(u8 tskId, u8 *pcMsg, u16 u16MsgLen);
 
-//#endif
+#endif
