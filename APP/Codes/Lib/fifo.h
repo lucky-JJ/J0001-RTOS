@@ -1,21 +1,11 @@
-/*****************************************************************
-*Company: BSJ
-*Creator: LKF
-*Project:
-*Module name:
-*
-*########################################
-*Compiler: IAR
-*MCU:  STM32F103VCT6
-*########################################
-*
-*File Name: fifo.h V1.2.2
-*Purpose: This file contains all the functions prototypes for fifo management routines
-*File References:
-*Create Date: Jan-10-2013
-*Change History
-*Description:
-******************************************************************/
+/*
+ * @Author: J
+ * @Date: 2020-05-29 09:49:07
+ * @LastEditTime: 2020-08-05 16:56:32
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \J0001-RTOS\APP\Codes\Lib\fifo.h
+ */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef _FIFO_H_
@@ -32,9 +22,6 @@ typedef struct
     u32 size;   /*  total size  */
     u8 *baseAddr;
 } fifo_TypeDef;
-
-
-
 
 u8 fifo_Init(fifo_TypeDef *_fifo, u8 *data, u32 size);
 u8 fifo_DeInit(fifo_TypeDef *_fifo);

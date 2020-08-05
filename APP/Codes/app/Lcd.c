@@ -7,9 +7,8 @@
  * @FilePath: \J0001-RTOS\APP\Codes\app\Lcd.c
  */
 #include "Lcd.h"
-#include "ResourceConfig.h"
+
 #include "MsgDefine.h"
-#include "Os.h"
 #include "cychdr.h"
 
 

@@ -10,13 +10,13 @@
 //#include "osif_freertos.h"
 //#include "app.h"
 //#include "sys.h"
-#include "Os.h"
+//#include "Os.h"
 
 //#include "EventDefine.h"
 #include "cychdr.h"
 #include "usart.h"
 #include "MsgDefine.h"
-#include "ResourceConfig.h"
+
 
 #include "usart.h"
 

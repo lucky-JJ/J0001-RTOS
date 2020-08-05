@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-05-29 09:49:07
- * @LastEditTime: 2020-08-03 16:33:57
+ * @LastEditTime: 2020-08-05 15:24:48
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \J0001-RTOS\APP\Codes\Driver\key.h
@@ -10,7 +10,8 @@
 #define _KEY_H
 #include "sys.h"
 #include "GPIO.h"
-#include "Os.h"
+#include "ResourceConfig.h"
+//#include "Os.h"
 
 #define Key0 GPIO_Read(IO_KEY0)
 #define Key1 GPIO_Read(IO_KEY1)

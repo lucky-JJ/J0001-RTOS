@@ -2,30 +2,16 @@
 //#include "Alarm.h"
 #include "ResourceConfig.h"
 #include <stdio.h>
-////#include "queue.h"
 #include "list.h"
 #include "Irq.h"
-//#include "FreeRTOS.h"
-//#include "task.h"
-/* Message id bit table of every task   */
-//uint32_t TaskMsgReadyList[TASK_NUM][MESSAGE_LIST_SIZE(COM_RECEIVE_MESSAGE_COUNT, 32)];
-//uint32_t TaskMsgCnt[TASK_NUM][2];
-//uint32_t *TaskList[TASK_NUM];
-//#if (MAX_SEM_AND_MTX_NUM > 0)
-SemaphoreHandle_t SemphrTbl[SID_Max];
-//#endif
-
-static StaticSemaphore_t xSemaphore_RtcMutex_buf;
-static StaticSemaphore_t xSemaphore_I2C0Mutex_buf;
-static StaticSemaphore_t xSemaphore_DbgMutex_buf;
-static StaticSemaphore_t xSemaphore_I2C0Sem_buf;
 
 /* os task declaration function */
 extern void TASK_Uart1(void *pvParameters);
 extern void TASK_Key(void *pvParameters);
 extern void TASK_Led(void *pvParameters);
 extern void TASK_Lcd(void *pvParameters);
-
+/*======================================================================================*/
+/*======================================================================================*/
 /* Task stk&tcb Buffer */
 
 //任务句柄
@@ -49,9 +35,6 @@ static StaticTask_t xTaskUartTask_TcbBuffer;
 static StaticTask_t xTaskKeyTask_TcbBuffer;
 static StaticTask_t xTaskLedTask_TcbBuffer;
 static StaticTask_t xTaskLcdTask_TcbBuffer;
-
-
-
 
 /**
  * @description: 静态创建任务
@@ -130,7 +113,8 @@ u8 TasksStaticCreate(void)
 
     return 0;
 }
-
+/*======================================================================================*/
+/*======================================================================================*/
 #define xUartQueueLength 256
 #define xKeyQueueLength 32
 #define xLedQueueLength 32
@@ -142,10 +126,12 @@ static u32 xQueueLedStroage[xLedQueueLength];
 static u32 xQueueLcdStroage[xLcdQueueLength];
 
 static StaticQueue_t xQueueBuf[DID_Max];
-QueueHandle_t TaskDataQueueTbl[configQUEUE_REGISTRY_SIZE];
 
-#ifdef USE_TASK_MAIL_BOX_LIST
-List_t TaskMailBoxTbl[DID_Max];
+//队列句柄
+#if (USE_TASK_MAIL_BOX_LIST == 1)
+List_t TaskMailBoxList[DID_Max];
+#else
+QueueHandle_t TaskDataQueueTbl[configQUEUE_REGISTRY_SIZE];
 #endif
 
 /**
@@ -165,7 +151,10 @@ u8 DataQueueCreateStatic(void)
         /* We want this queue to be viewable in a RTOS kernel aware debugger, so register it. */
         vQueueAddToRegistry(xQueue, "Uart");
 #endif
+
+#if (USE_TASK_MAIL_BOX_LIST == 0)
         TaskDataQueueTbl[DID_Uart] = xQueue;
+#endif
     }
     else
     {
@@ -179,7 +168,10 @@ u8 DataQueueCreateStatic(void)
         /* We want this queue to be viewable in a RTOS kernel aware debugger, so register it. */
         vQueueAddToRegistry(xQueue, "Key");
 #endif
+
+#if (USE_TASK_MAIL_BOX_LIST == 0)
         TaskDataQueueTbl[DID_Key] = xQueue;
+#endif
     }
     else
     {
@@ -191,9 +183,12 @@ u8 DataQueueCreateStatic(void)
     {
 #if (configQUEUE_REGISTRY_SIZE > 0)
         /* We want this queue to be viewable in a RTOS kernel aware debugger, so register it. */
-        vQueueAddToRegistry(xQueue, "Uart");
+        vQueueAddToRegistry(xQueue, "Led");
 #endif
-        TaskDataQueueTbl[DID_Uart] = xQueue;
+        
+#if (USE_TASK_MAIL_BOX_LIST == 0)
+        TaskDataQueueTbl[DID_Led] = xQueue;
+#endif
     }
     else
     {
@@ -207,22 +202,33 @@ u8 DataQueueCreateStatic(void)
         /* We want this queue to be viewable in a RTOS kernel aware debugger, so register it. */
         vQueueAddToRegistry(xQueue, "Lcd");
 #endif
+       
+#if (USE_TASK_MAIL_BOX_LIST == 0)
         TaskDataQueueTbl[DID_Lcd] = xQueue;
+#endif
     }
     else
     {
         return 1;
     }
 
-#ifdef USE_TASK_MAIL_BOX_LIST
+#if (USE_TASK_MAIL_BOX_LIST == 1)
     for (Index = 0; Index < DID_Max; Index++)
     {
-        vListInitialise(&TaskMailBoxTbl[Index]);
+        vListInitialise(&TaskMailBoxList[Index]);
     }
 #endif
 
     return 0;
 }
+/*======================================================================================*/
+/*======================================================================================*/
+SemaphoreHandle_t SemphrTbl[SID_Max];
+
+static StaticSemaphore_t xSemaphore_RtcMutex_buf;
+static StaticSemaphore_t xSemaphore_I2CMutex_buf;
+static StaticSemaphore_t xSemaphore_DbgMutex_buf;
+static StaticSemaphore_t xSemaphore_I2C0Sem_buf;
 
 /**
  * @description: 创建静态互斥信号量 / 创建静态计数信号量
@@ -231,7 +237,6 @@ u8 DataQueueCreateStatic(void)
  */
 u8 SemphrCreateStatic(void)
 {
-    //#if (MAX_SEM_AND_MTX_NUM > 0)
     SemaphoreHandle_t xSemaphore = NULL;
 
     xSemaphore = xSemaphoreCreateMutexStatic(&xSemaphore_RtcMutex_buf);
@@ -243,10 +248,10 @@ u8 SemphrCreateStatic(void)
     {
         return 1;
     }
-    xSemaphore = xSemaphoreCreateMutexStatic(&xSemaphore_I2C0Mutex_buf);
+    xSemaphore = xSemaphoreCreateMutexStatic(&xSemaphore_I2CMutex_buf);
     if (xSemaphore != NULL)
     {
-        SemphrTbl[SID_I2C0Mutex] = xSemaphore;
+        SemphrTbl[SID_I2CMutex] = xSemaphore;
     }
     else
     {
@@ -271,7 +276,6 @@ u8 SemphrCreateStatic(void)
         return 1;
     }
 
-    //#endif
     return 0;
 }
 

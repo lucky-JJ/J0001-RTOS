@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2020-07-28 09:50:44
- * @LastEditTime: 2020-08-03 16:36:35
+ * @LastEditTime: 2020-08-05 16:54:46
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \J0001-RTOS\APP\Codes\ServiceLayer\Os.c
@@ -200,7 +200,7 @@ void OS_HOOK_ErrorHook(uint8_t State, uint8_t ServiceId, uint8_t ID)
 u32 Os_MtxLock(u8 MutexId, const u32 timeout)
 {
     u32 timeoutTicks;
-    u32 osif_ret_code = 1;
+    u32 ret_code = 1;
     TaskHandle_t mutex_holder_handle;
     TaskHandle_t current_task_handle;
     BaseType_t operation_status = pdFAIL;
@@ -208,7 +208,7 @@ u32 Os_MtxLock(u8 MutexId, const u32 timeout)
 
     if (MutexId > SID_Max)
     {
-        osif_ret_code = 1;
+        ret_code = 1;
     }
     else
     {
@@ -224,7 +224,7 @@ u32 Os_MtxLock(u8 MutexId, const u32 timeout)
             /* If pMutex has been locked by current task, return error. */
             if (mutex_holder_handle == current_task_handle)
             {
-                osif_ret_code = 1;
+                ret_code = 1;
             }
             else
             {
@@ -241,12 +241,12 @@ u32 Os_MtxLock(u8 MutexId, const u32 timeout)
                 /* Try to take the semaphore */
                 operation_status = xSemaphoreTake((QueueHandle_t)pMutex, timeoutTicks);
 
-                osif_ret_code = (operation_status == pdPASS) ? 0 : 1;
+                ret_code = (operation_status == pdPASS) ? 0 : 1;
             }
         }
     }
 
-    return osif_ret_code;
+    return ret_code;
 }
 
 /**
@@ -259,7 +259,7 @@ u32 Os_MtxUnlock(u8 MutexId)
     /* The (pMutex == NULL) case is a valid option, signaling that the mutex does
      * not need to be unlocked - do not use DEV_ASSERT in this case */
 
-    u32 osif_ret_code = 0;
+    u32 ret_code = 0;
     TaskHandle_t mutex_holder_handle;
     TaskHandle_t current_task_handle;
     BaseType_t operation_status = pdFAIL;
@@ -267,7 +267,7 @@ u32 Os_MtxUnlock(u8 MutexId)
 
     if (MutexId > SID_Max)
     {
-        osif_ret_code = 1;
+        ret_code = 1;
     }
     else
     {
@@ -283,29 +283,64 @@ u32 Os_MtxUnlock(u8 MutexId)
             /* If pMutex is not locked by current task, return error. */
             if (mutex_holder_handle != current_task_handle)
             {
-                osif_ret_code = 1;
+                ret_code = 1;
             }
             else
             {
                 operation_status = xSemaphoreGive(pMutex);
-                osif_ret_code = (operation_status == pdPASS) ? 0 : 1;
+                ret_code = (operation_status == pdPASS) ? 0 : 1;
             }
         }
     }
 
-    return osif_ret_code;
+    return ret_code;
+}
+/**
+ * @description: 初始化信号量
+ * @param {type} 
+ * @return {type} 
+ */
+u8 OS_SemaCreate(semaphore_t * const pSem,const u8 initValue)
+{
+
+    u8 ret_code = 0;
+
+    *pSem = xSemaphoreCreateCounting(0xFFu, initValue);
+
+    if (*pSem == NULL)
+    {
+        ret_code = 1; /* semaphore not created successfully */
+    }
+
+    return ret_code;
 }
 
+/**
+ * @description: 删除信号量
+ * @param {type} 
+ * @return {type} 
+ */
+u8 OS_SemaDestroy(const semaphore_t * const pSem)
+{
+    vSemaphoreDelete(*pSem);
+
+    return 0;
+}
+/**
+ * @description: 等待信号量
+ * @param {type} 
+ * @return {type} 
+ */
 u32 Os_SemWait(const u8 SemId, const u32 timeout)
 {
     u32 timeoutTicks;
     BaseType_t operation_status;
-    u32 osif_ret_code;
+    u32 ret_code;
     semaphore_t *pSem;
 
     if (SemId > SID_Max)
     {
-        osif_ret_code = 1;
+        ret_code = 1;
     }
     else
     {
@@ -323,27 +358,27 @@ u32 Os_SemWait(const u8 SemId, const u32 timeout)
         /* Try to take the semaphore */
         operation_status = xSemaphoreTake((QueueHandle_t)pSem, timeoutTicks);
 
-        osif_ret_code = (operation_status == pdPASS) ? 0 : 1;
+        ret_code = (operation_status == pdPASS) ? 0 : 1;
     }
 
-    return osif_ret_code;
+    return ret_code;
 }
 
 /**
- * @description: 
+ * @description: 释放信号量
  * @param {type} 
  * @return: 
  */
 u32 Os_SemPost(const u8 SemId)
 {
     BaseType_t operation_status = pdFAIL;
-    u32 osif_ret_code;
+    u32 ret_code;
     semaphore_t *pSem;
     bool is_isr;
 
     if (SemId > SID_Max)
     {
-        osif_ret_code = 1;
+        ret_code = 1;
     }
     else
     {
@@ -369,10 +404,10 @@ u32 Os_SemPost(const u8 SemId)
         }
 
         /* pdFAIL in case that the semaphore is full */
-        osif_ret_code = (operation_status == pdPASS) ? 0 : 1;
+        ret_code = (operation_status == pdPASS) ? 0 : 1;
     }
 
-    return osif_ret_code;
+    return ret_code;
 }
 
 void ResumeAllInterrupts(void)
@@ -434,7 +469,7 @@ s32 OS_ReceiveMailboxInternal(u8 mbid, SMP_MSG **mb_msg, u32 timeout)
     }
     else
     {
-        pList = &TaskMailBoxTbl[mbid];
+        pList = &TaskMailBoxList[mbid];
         if (listLIST_IS_EMPTY(pList))
         {
             RetVal = 2;
@@ -540,7 +575,7 @@ static u32 OS_SendMailboxInternal(u8 mbid, SMP_MSG *mb_msg)
     }
     else
     {
-        pList = &TaskMailBoxTbl[mbid];
+        pList = &TaskMailBoxList[mbid];
         mqMsg = (SMP_MSG *)mb_msg;
 
         vTaskSuspendAll();
@@ -685,7 +720,7 @@ void OS_FreeMailBoxMemory(void *pBuf)
 
     for (Index = 0; Index < TID_Max; Index++)
     {
-        pList = &TaskMailBoxTbl[Index];
+        pList = &TaskMailBoxList[Index];
 
         if (pList != NULL)
         {

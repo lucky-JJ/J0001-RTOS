@@ -1,19 +1,17 @@
 /*
  * @Author: your name
  * @Date: 2020-05-29 09:49:07
- * @LastEditTime: 2020-08-03 15:35:14
+ * @LastEditTime: 2020-08-05 15:32:06
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \J0001-RTOS\APP\Codes\Driver\led.c
  */
 #include "led.h"
-
-#include "ResourceConfig.h"
-#include "GPIO.h"
-//#include "stm32f4xx_hal_gpio.h"
-#include "MsgDefine.h"
-#include "Os.h"
 #include "key.h"
+
+#include "GPIO.h"
+#include "MsgDefine.h"
+
 
 static void Set_Led0(u8 OnOFF)
 {

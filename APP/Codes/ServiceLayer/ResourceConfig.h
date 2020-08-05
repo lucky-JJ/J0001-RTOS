@@ -1,7 +1,7 @@
 /*
  * @Author: J
  * @Date: 2020-07-28 10:59:07
- * @LastEditTime: 2020-08-04 10:12:12
+ * @LastEditTime: 2020-08-05 15:27:41
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \APP\Codes\ServiceLayer\ResourceConfig.h
@@ -22,7 +22,7 @@ enum
 
     /* semaphore id config  */
     SID_RtcMutex = 0,
-    SID_I2C0Mutex,
+    SID_I2CMutex,
     SID_DbgMutex,
     SID_I2C0Sem,
     SID_Max,
@@ -59,17 +59,16 @@ enum
 #define EVENT_GLOBAL_TIMER_10MS (1 << 3) // for All Task
 
 
-
+//信号量句柄
 extern SemaphoreHandle_t SemphrTbl[SID_Max];
 
 //任务句柄
 //extern TaskHandle_t TaskTcbTbl[TID_Max];
 extern uint32_t *TaskList[TID_Max];
 
-
 //邮箱句柄
 #if (USE_TASK_MAIL_BOX_LIST == 1)
-    extern List_t TaskMailBoxTbl[DID_Max];
+    extern List_t TaskMailBoxList[DID_Max];
 #else
     extern QueueHandle_t TaskDataQueueTbl[configQUEUE_REGISTRY_SIZE];
 #endif

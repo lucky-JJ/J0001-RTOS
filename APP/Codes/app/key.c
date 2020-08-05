@@ -1,10 +1,9 @@
 #include "key.h"
-//#include "delay.h"
-#include "MsgDefine.h"
 #include "led.h"
-#include "cychdr.h"
 
-#include "ResourceConfig.h"
+#include "cychdr.h"
+#include "MsgDefine.h"
+
 
 u32 SendMsgToKey(u8 *MsgData, u16 MsgLen)
 {

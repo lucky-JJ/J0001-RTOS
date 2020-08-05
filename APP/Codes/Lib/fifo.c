@@ -1,27 +1,17 @@
-/*****************************************************************
-*Company: BSJ
-*Creator: LKF
-*Project: XT-300
-*Module name:
-*
-*########################################
-*Compiler: IAR6.1
-*MCU:  STM32F217ZGT6, 1024KROM  128KRAM  M50
-*CLOCK: HSE 12Mhz   PLL: 120MHz
-*########################################
-*
-*File Name:
-*Purpose:
-*File References:
-*Create Date: Mar-27-2014
-*Change History
-*Description
-******************************************************************/
+/*
+ * @Author: J
+ * @Date: 2020-05-29 09:49:07
+ * @LastEditTime: 2020-08-05 17:14:57
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \J0001-RTOS\APP\Codes\Lib\fifo.c
+ */
+
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdlib.h>
-#include "fifo.h"
 #include <string.h>
+#include "fifo.h"
 
 #if 0
 #pragma inline(fifo_GetLen)
@@ -40,7 +30,6 @@
     Change history:
     Note:
     Author:
-    Date:     Jan-10-2013
 ************************************************************************/
 u8 fifo_Init(fifo_TypeDef *_fifo, u8 *data, u32 size)
 {
@@ -90,7 +79,6 @@ u8 fifo_Init(fifo_TypeDef *_fifo, u8 *data, u32 size)
     Change history:
     Note:
     Author:
-    Date:     Jan-10-2013
 ************************************************************************/
 u8 fifo_DeInit(fifo_TypeDef *_fifo)
 {
@@ -126,7 +114,6 @@ u8 fifo_DeInit(fifo_TypeDef *_fifo)
     Change history:
     Note:
     Author:
-    Date:     Jan-10-2013
 ************************************************************************/
 u8 fifo_Reset(fifo_TypeDef *_fifo)
 {
@@ -160,7 +147,6 @@ u8 fifo_Reset(fifo_TypeDef *_fifo)
     Change history:
     Note:
     Author:
-    Date:     Jan-10-2013
 ************************************************************************/
 u32 fifo_GetLen(fifo_TypeDef *_fifo)
 {
@@ -181,7 +167,6 @@ u32 fifo_GetLen(fifo_TypeDef *_fifo)
     Change history:
     Note:
     Author:
-    Date:     Jan-10-2013
 ************************************************************************/
 u32 fifo_GetFreeSpace(fifo_TypeDef *_fifo)
 {
@@ -202,7 +187,6 @@ u32 fifo_GetFreeSpace(fifo_TypeDef *_fifo)
     Change history:
     Note:
     Author:
-    Date:     Jan-10-2013
 ************************************************************************/
 FlagStatus fifo_NotFull(fifo_TypeDef *_fifo)
 {
@@ -225,7 +209,6 @@ FlagStatus fifo_NotFull(fifo_TypeDef *_fifo)
     Change history:
     Note:
     Author:
-    Date:     Jan-10-2013
 ************************************************************************/
 u32 fifo_insert(fifo_TypeDef *_fifo, u8 *data, u32 len)
 {
@@ -261,7 +244,6 @@ u32 fifo_insert(fifo_TypeDef *_fifo, u8 *data, u32 len)
     Change history:
     Note:
     Author:
-    Date:     Jan-10-2013
 ************************************************************************/
 u32 fifo_retrieve(fifo_TypeDef *_fifo, u8 *data, u32 len)
 {
@@ -320,3 +302,39 @@ u32 Fifo_strchr(fifo_TypeDef *_fifo, u8 data)
 
     return 0;
 }
+/*
+init[20] = {1,1,2,2...}
+
+data[2] = {3,3}
+fifo_insert(xx,data,2)
+
+u32 fifo_insert(fifo_TypeDef *_fifo, u8 *data, u32 len)
+{
+    u32 real_len;
+    u32 offset;
+    u32 end;
+
+    offset = _fifo->size - (_fifo->tail - _fifo->head);
+	//offset = 20 - (4-0) = 16
+    //我们可以写入的数据的实际大小
+    real_len = MIN_VAL(len, offset);
+	//real_len = 2
+    //写指针的偏移量
+    offset = _fifo->tail % _fifo->size;
+	//offset = 4%20 = 4
+    //End position before buffer being warpped
+    end = MIN_VAL(real_len, _fifo->size - offset);
+	//end = 2,
+
+   // Copy data to buffer before warp 
+    memcpy(_fifo->baseAddr + offset, data, end);
+	
+
+    //Copy data to buffer after warp
+    memcpy(_fifo->baseAddr, data + end, real_len - end);
+
+    _fifo->tail += real_len;
+
+    return real_len;
+}
+*/
