@@ -11,9 +11,10 @@
 	注:如果应用中必须使用高速数据传输，那么SPI是必然的选择。因为SPI是全双工，IIC的不是。
 	
 1. 采用主-从模式(Master-Slave) 的控制方式
-	SPI 规定了两个 SPI 设备之间通信必须由主设备 (Master) 来控制次设备 (Slave). 一个 Master 设备可以通过提供
-	Clock 以及对 Slave 设备进行片选 (Slave Select) 来控制多个 Slave 设备, SPI 协议还规定 Slave 设备的 Clock 由
-	Master 设备通过 SCK 管脚提供给 Slave 设备, Slave 设备本身不能产生或控制 Clock, 没有 Clock 则 Slave 设备不能正常工作.
+	SPI 规定了两个 SPI 设备之间通信必须由主设备 (Master) 来控制次设备 (Slave). 
+    一个 Master 设备可以通过提供 Clock 以及对 Slave 设备进行片选 (Slave Select) 来控制多个 Slave 设备, 
+    SPI 协议还规定 Slave 设备的 Clock 由 Master 设备通过 SCK 管脚提供给 Slave 设备, 
+    Slave 设备本身不能产生或控制 Clock, 没有 Clock 则 Slave 设备不能正常工作.
 	
 2. 采用同步方式(Synchronous)传输数据
 	Master 设备会根据将要交换的数据来产生相应的时钟脉冲(Clock Pulse), 时钟脉冲组成了时钟信号(Clock Signal) , 

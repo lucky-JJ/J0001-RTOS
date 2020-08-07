@@ -177,7 +177,7 @@ HAL_StatusTypeDef HAL_Init(void)
 #endif /* PREFETCH_ENABLE */
 
     /* Set Interrupt Group Priority */
-    HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4); //娑擃厽鏌囨导妯哄帥缁狙冨瀻缂侊拷4
+    HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4); //濞戞搩鍘介弻鍥ㄥ濡搫甯ョ紒鐙欏啫鐎荤紓渚婃嫹4
 
     /* Use systick as time base source and configure 1ms tick (default clock after Reset is HSI) */
     HAL_InitTick(TICK_INT_PRIORITY);
@@ -265,7 +265,7 @@ __weak void HAL_MspDeInit(void)
   */
 __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 {
-    /*Configure the SysTick to have interrupt in 1ms time basis 閻忓繐鎽杫sTick闂佹澘绉堕悿鍡樼▔閸濆嫭韬�1ms闁哄啫鐖煎Λ鍧楀礃閸涱厼寰旈柡鍫濐槷閼垫垿寮敓锟�*/
+    /*Configure the SysTick to have interrupt in 1ms time basis 闁诲繐绻愰幗鏉玸Tick闂備焦婢樼粔鍫曟偪閸℃鈻旈柛婵嗗闊拷1ms闂佸搫鍟悥鐓幬涢崸妤€绀冮柛娑卞幖瀵版棃鏌￠崼婵愭Х闁煎灚鍨垮顒勬晸閿燂拷*/
     HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 
     /*Configure the SysTick IRQ priority */

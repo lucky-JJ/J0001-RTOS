@@ -1,7 +1,7 @@
 /*
- * @Author: your name
+ * @Author: J
  * @Date: 2020-07-28 09:50:44
- * @LastEditTime: 2020-08-05 16:54:46
+ * @LastEditTime: 2020-08-06 16:06:35
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \J0001-RTOS\APP\Codes\ServiceLayer\Os.c
@@ -765,7 +765,6 @@ void StartOS(void)
  * @param Error - Reason for shutdown
  */
 
-/** @req OS071 */
 void ShutdownOS(u8 Error)
 {
 #if 0
@@ -777,7 +776,6 @@ void ShutdownOS(u8 Error)
 
     Irq_Disable();
 #endif
-    /** @req OS425 */
     while (1)
     {
         ;
